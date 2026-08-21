@@ -69,16 +69,6 @@
             </fieldset>
           </div>
 
-          <div class="field field-wide">
-            <label for="email">E-Mail-Adresse <span aria-hidden="true">*</span></label>
-            <div class="input-wrap">
-              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
-              <input id="email" name="email" type="email" placeholder="name@beispiel.de" autocomplete="email" required aria-describedby="emailHint emailError">
-            </div>
-            <span class="field-hint" id="emailHint">Wir senden dir die gefundenen Angebote bequem per E-Mail.</span>
-            <span class="field-error" id="emailError"></span>
-          </div>
-
           <button class="primary-button" id="searchButton" type="submit">
             <span class="button-label"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m20 20-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>Artikel suchen</span>
             <span class="button-loading"><span class="spinner" aria-hidden="true"></span>Angebote werden gesucht …</span>
@@ -92,17 +82,28 @@
           <div><span class="eyebrow">Deine Auswahl</span><h2 id="resultsHeading">Gefundene Angebote</h2></div>
           <span id="resultsCount" class="results-count"></span>
         </div>
-        <div id="resultsList" class="results-list"></div>
-        <div id="emptyState" class="empty-state" hidden>
-          <span aria-hidden="true">⌕</span>
-          <h3>Keine Angebote gefunden</h3>
-          <p>Leider wurden in diesem Umkreis keine passenden Angebote gefunden. Vergrößere den Radius oder ändere den Artikelnamen.</p>
+        <div class="results-table-wrap">
+          <table class="results-table">
+            <thead><tr><th scope="col">Artikel</th><th scope="col">Menge</th><th scope="col">Preis</th><th scope="col">Entfernung</th><th scope="col">Markt-Adresse</th></tr></thead>
+            <tbody id="resultsList"></tbody>
+          </table>
         </div>
-        <button id="emailButton" class="secondary-button" type="button" hidden>
-          <span class="email-button-label">Ergebnisse per E-Mail senden</span>
-          <span class="email-button-loading"><span class="spinner" aria-hidden="true"></span>Wird gesendet …</span>
-        </button>
-        <div id="emailMessage" class="message" role="status" aria-live="polite"></div>
+        <div class="email-option">
+          <div class="field field-wide">
+            <label for="email">E-Mail-Adresse <span class="optional-label">(optional)</span></label>
+            <div class="input-wrap">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+              <input id="email" name="email" type="email" placeholder="name@beispiel.de" autocomplete="email" aria-describedby="emailHint emailError">
+            </div>
+            <span class="field-hint" id="emailHint">Wenn du möchtest, senden wir dir diese Angebote per E-Mail.</span>
+            <span class="field-error" id="emailError"></span>
+          </div>
+          <button id="emailButton" class="secondary-button" type="button" disabled>
+            <span class="email-button-label">Ergebnisse per E-Mail senden</span>
+            <span class="email-button-loading"><span class="spinner" aria-hidden="true"></span>Wird gesendet …</span>
+          </button>
+          <div id="emailMessage" class="message" role="status" aria-live="polite"></div>
+        </div>
       </section>
     </main>
 

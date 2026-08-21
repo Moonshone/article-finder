@@ -13,9 +13,9 @@ let lastSearchData = null;
 
 // Ausschließlich lokale Demo-Daten für den Betrieb ohne verbundenen n8n-Workflow.
 const demoResults = [
-  { store: "REWE", product: "Coca-Cola Zero Sugar 1,5 l", price: "1,49 €", distance: "850 m", address: "Musterstraße 10, 10115 Berlin", url: "#" },
-  { store: "EDEKA", product: "Coca-Cola Zero Sugar 1,5 l", price: "1,59 €", distance: "1,3 km", address: "Beispielstraße 22, 10115 Berlin", url: "#" },
-  { store: "Kaufland", product: "Coca-Cola Zero Sugar 1,5 l", price: "1,39 €", distance: "2,1 km", address: "Testweg 5, 10115 Berlin", url: "#" }
+  { store: "REWE", product: "Coca-Cola Zero Sugar 1,5 l", quantity: "1 Flasche", price: "1,49 €", distance: "850 m", address: "Musterstraße 10, 10115 Berlin" },
+  { store: "EDEKA", product: "Coca-Cola Zero Sugar 1,5 l", quantity: "6 Flaschen", price: "1,59 €", distance: "1,3 km", address: "Beispielstraße 22, 10115 Berlin" },
+  { store: "Kaufland", product: "Coca-Cola Zero Sugar 1,5 l", quantity: "1 Flasche", price: "1,39 €", distance: "2,1 km", address: "Testweg 5, 10115 Berlin" }
 ];
 
 const elements = {
@@ -25,7 +25,7 @@ const elements = {
   increaseRadius: document.querySelector("#increaseRadius"), searchButton: document.querySelector("#searchButton"),
   searchMessage: document.querySelector("#searchMessage"), resultsSection: document.querySelector("#resultsSection"),
   resultsList: document.querySelector("#resultsList"), resultsCount: document.querySelector("#resultsCount"),
-  emptyState: document.querySelector("#emptyState"), emailButton: document.querySelector("#emailButton"),
+  emailButton: document.querySelector("#emailButton"),
   emailMessage: document.querySelector("#emailMessage")
 };
 
@@ -54,10 +54,8 @@ function isValidEmail(value) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/i.test(valu
 function validateForm() {
   const article = elements.article.value.trim();
   const postalCode = elements.postalCode.value.trim();
-  const email = elements.email.value.trim();
   setFieldError(elements.article, article ? "" : "Bitte gib einen Artikel ein.");
   setFieldError(elements.postalCode, /^\d{5}$/.test(postalCode) ? "" : "Bitte gib eine gültige deutsche Postleitzahl mit 5 Ziffern ein.");
-  setFieldError(elements.email, isValidEmail(email) ? "" : "Bitte gib eine gültige E-Mail-Adresse ein.");
   const firstInvalid = elements.form.querySelector('[aria-invalid="true"]');
   if (firstInvalid) firstInvalid.focus();
   return !firstInvalid;
@@ -81,38 +79,25 @@ function createTextElement(tag, className, text) {
   return element;
 }
 
-function safeOfferUrl(value) {
-  if (value === "#") return "#";
-  try { const url = new URL(value); return ["http:", "https:"].includes(url.protocol) ? url.href : null; }
-  catch { return null; }
-}
-
 function renderResults(results) {
   currentResults = Array.isArray(results) ? results : [];
   elements.resultsList.replaceChildren();
-  elements.resultsSection.hidden = false;
-  elements.emptyState.hidden = currentResults.length > 0;
-  elements.resultsCount.textContent = currentResults.length ? `${currentResults.length} Angebote` : "0 Angebote";
+  elements.resultsSection.hidden = currentResults.length === 0;
+  if (!currentResults.length) {
+    showMessage(elements.searchMessage, "Leider wurden in diesem Umkreis keine passenden Angebote gefunden. Vergrößere den Radius oder ändere den Artikelnamen.", "error");
+    return;
+  }
+  elements.resultsCount.textContent = `${currentResults.length} Angebote`;
 
   currentResults.forEach((offer) => {
-    const card = document.createElement("article"); card.className = "result-card";
-    const content = document.createElement("div");
-    content.append(createTextElement("p", "result-store", offer.store), createTextElement("h3", "result-product", offer.product));
-    const meta = document.createElement("div"); meta.className = "result-meta";
-    meta.append(createTextElement("span", "", `⌖ ${offer.distance ?? "–"}`), createTextElement("span", "", `◦ ${offer.address ?? "–"}`));
-    content.append(meta);
-    const url = safeOfferUrl(offer.url);
-    if (url) {
-      const link = createTextElement("a", "result-link", "Zum Angebot →");
-      link.href = url; link.target = url === "#" ? "_self" : "_blank"; link.rel = "noopener noreferrer";
-      if (url === "#") link.addEventListener("click", (event) => event.preventDefault());
-      content.append(link);
-    }
-    card.append(content, createTextElement("strong", "result-price", offer.price));
-    elements.resultsList.append(card);
+    const row = document.createElement("tr");
+    const productCell = createTextElement("td", "result-product", offer.product);
+    productCell.append(createTextElement("span", "result-store", offer.store));
+    row.append(productCell, createTextElement("td", "", offer.quantity), createTextElement("td", "result-price", offer.price), createTextElement("td", "", offer.distance), createTextElement("td", "", offer.address));
+    elements.resultsList.append(row);
   });
 
-  elements.emailButton.hidden = !(currentResults.length && isValidEmail(elements.email.value.trim()));
+  updateEmailState();
   elements.resultsSection.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
@@ -124,7 +109,7 @@ async function searchArticle(event) {
   showMessage(elements.searchMessage);
   showMessage(elements.emailMessage);
   if (!validateForm()) return;
-  lastSearchData = { article: elements.article.value.trim(), postalCode: elements.postalCode.value.trim(), radius, email: elements.email.value.trim() };
+  lastSearchData = { article: elements.article.value.trim(), postalCode: elements.postalCode.value.trim(), radius };
   setLoadingState(true);
   try {
     let results;
@@ -145,7 +130,9 @@ async function searchArticle(event) {
 }
 
 async function sendResultsByEmail() {
-  if (!currentResults.length || !lastSearchData || !isValidEmail(elements.email.value.trim())) return;
+  const email = elements.email.value.trim();
+  setFieldError(elements.email, isValidEmail(email) ? "" : "Bitte gib eine gültige E-Mail-Adresse ein.");
+  if (!currentResults.length || !lastSearchData || !isValidEmail(email)) { elements.email.focus(); return; }
   elements.emailButton.disabled = true; elements.emailButton.classList.add("is-loading");
   showMessage(elements.emailMessage);
   const payload = { ...lastSearchData, email: elements.email.value.trim(), results: currentResults };
@@ -166,6 +153,12 @@ elements.decreaseRadius.addEventListener("click", decreaseRadius);
 elements.increaseRadius.addEventListener("click", increaseRadius);
 elements.form.addEventListener("submit", searchArticle);
 elements.emailButton.addEventListener("click", sendResultsByEmail);
+function updateEmailState() {
+  const email = elements.email.value.trim();
+  elements.emailButton.disabled = !currentResults.length || !isValidEmail(email);
+  if (!email || isValidEmail(email)) setFieldError(elements.email, "");
+}
 elements.postalCode.addEventListener("input", () => { elements.postalCode.value = elements.postalCode.value.replace(/\D/g, "").slice(0, 5); });
-[elements.article, elements.postalCode, elements.email].forEach((field) => field.addEventListener("input", () => setFieldError(field, "")));
+[elements.article, elements.postalCode].forEach((field) => field.addEventListener("input", () => setFieldError(field, "")));
+elements.email.addEventListener("input", updateEmailState);
 updateRadiusDisplay();
