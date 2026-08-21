@@ -149,16 +149,20 @@ async function sendResultsByEmail() {
   } finally { elements.emailButton.disabled = false; elements.emailButton.classList.remove("is-loading"); }
 }
 
-elements.decreaseRadius.addEventListener("click", decreaseRadius);
-elements.increaseRadius.addEventListener("click", increaseRadius);
-elements.form.addEventListener("submit", searchArticle);
-elements.emailButton.addEventListener("click", sendResultsByEmail);
 function updateEmailState() {
   const email = elements.email.value.trim();
   elements.emailButton.disabled = !currentResults.length || !isValidEmail(email);
   if (!email || isValidEmail(email)) setFieldError(elements.email, "");
 }
-elements.postalCode.addEventListener("input", () => { elements.postalCode.value = elements.postalCode.value.replace(/\D/g, "").slice(0, 5); });
-[elements.article, elements.postalCode].forEach((field) => field.addEventListener("input", () => setFieldError(field, "")));
-elements.email.addEventListener("input", updateEmailState);
-updateRadiusDisplay();
+
+// Die Formularlogik nur auf der Seite initialisieren, die das Suchformular enthält.
+if (elements.form) {
+  elements.decreaseRadius.addEventListener("click", decreaseRadius);
+  elements.increaseRadius.addEventListener("click", increaseRadius);
+  elements.form.addEventListener("submit", searchArticle);
+  elements.emailButton.addEventListener("click", sendResultsByEmail);
+  elements.postalCode.addEventListener("input", () => { elements.postalCode.value = elements.postalCode.value.replace(/\D/g, "").slice(0, 5); });
+  [elements.article, elements.postalCode].forEach((field) => field.addEventListener("input", () => setFieldError(field, "")));
+  elements.email.addEventListener("input", updateEmailState);
+  updateRadiusDisplay();
+}
