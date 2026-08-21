@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Finde Artikel und Angebote in Geschäften in deiner Nähe.">
+  <title>Article Finder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="site-header" aria-label="Article Finder">
+      <a class="brand" href="#" aria-label="Article Finder Startseite">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m20 20-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+        </span>
+        <span>Article Finder</span>
+      </a>
+      <span class="demo-badge"><span aria-hidden="true"></span> Demo-Modus</span>
+    </header>
+
+    <main>
+      <section class="hero" aria-labelledby="page-title">
+        <span class="eyebrow">Einfach suchen. Besser finden.</span>
+        <h1 id="page-title">Dein Wunschartikel.<br><span>Ganz in deiner Nähe.</span></h1>
+        <p>Finde einen Artikel in deiner Umgebung und vergleiche verfügbare Angebote – schnell, lokal und unkompliziert.</p>
+      </section>
+
+      <section class="search-card" aria-labelledby="search-heading">
+        <div class="card-heading">
+          <span class="step">01</span>
+          <div>
+            <h2 id="search-heading">Wonach suchst du?</h2>
+            <p>Verrate uns, was du brauchst und wo wir suchen sollen.</p>
+          </div>
+        </div>
+
+        <form id="searchForm" novalidate>
+          <div class="field field-wide">
+            <label for="article">Artikel <span aria-hidden="true">*</span></label>
+            <div class="input-wrap">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m20 20-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+              <input id="article" name="article" type="text" placeholder="z. B. Coca-Cola Zero 1,5 l" autocomplete="off" required aria-describedby="articleError">
+            </div>
+            <span class="field-error" id="articleError"></span>
+          </div>
+
+          <div class="form-grid">
+            <div class="field">
+              <label for="postalCode">Postleitzahl <span aria-hidden="true">*</span></label>
+              <div class="input-wrap">
+                <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <input id="postalCode" name="postalCode" type="text" inputmode="numeric" maxlength="5" placeholder="10115" autocomplete="postal-code" required aria-describedby="postalCodeError">
+              </div>
+              <span class="field-error" id="postalCodeError"></span>
+            </div>
+
+            <fieldset class="field radius-field">
+              <legend>Suchradius</legend>
+              <div class="radius-control">
+                <button id="decreaseRadius" class="radius-button" type="button" aria-label="Suchradius um 50 Meter verringern">−</button>
+                <output id="radiusDisplay" aria-live="polite">1 km</output>
+                <button id="increaseRadius" class="radius-button" type="button" aria-label="Suchradius um 50 Meter erhöhen">+</button>
+              </div>
+              <span class="field-hint">50 m bis 10 km</span>
+            </fieldset>
+          </div>
+
+          <div class="field field-wide">
+            <label for="email">E-Mail-Adresse <span aria-hidden="true">*</span></label>
+            <div class="input-wrap">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m4 7 8 6 8-6"/></svg>
+              <input id="email" name="email" type="email" placeholder="name@beispiel.de" autocomplete="email" required aria-describedby="emailHint emailError">
+            </div>
+            <span class="field-hint" id="emailHint">Wir senden dir die gefundenen Angebote bequem per E-Mail.</span>
+            <span class="field-error" id="emailError"></span>
+          </div>
+
+          <button class="primary-button" id="searchButton" type="submit">
+            <span class="button-label"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="m20 20-4.3-4.3m2.3-5.2a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>Artikel suchen</span>
+            <span class="button-loading"><span class="spinner" aria-hidden="true"></span>Angebote werden gesucht …</span>
+          </button>
+        </form>
+        <div id="searchMessage" class="message" role="status" aria-live="polite"></div>
+      </section>
+
+      <section id="resultsSection" class="results-section" aria-labelledby="resultsHeading" hidden>
+        <div class="results-heading">
+          <div><span class="eyebrow">Deine Auswahl</span><h2 id="resultsHeading">Gefundene Angebote</h2></div>
+          <span id="resultsCount" class="results-count"></span>
+        </div>
+        <div id="resultsList" class="results-list"></div>
+        <div id="emptyState" class="empty-state" hidden>
+          <span aria-hidden="true">⌕</span>
+          <h3>Keine Angebote gefunden</h3>
+          <p>Leider wurden in diesem Umkreis keine passenden Angebote gefunden. Vergrößere den Radius oder ändere den Artikelnamen.</p>
+        </div>
+        <button id="emailButton" class="secondary-button" type="button" hidden>
+          <span class="email-button-label">Ergebnisse per E-Mail senden</span>
+          <span class="email-button-loading"><span class="spinner" aria-hidden="true"></span>Wird gesendet …</span>
+        </button>
+        <div id="emailMessage" class="message" role="status" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer><span>© 2026 Article Finder</span><span>Sicher · Lokal · Unkompliziert</span></footer>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
