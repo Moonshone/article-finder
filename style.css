@@ -90,3 +90,22 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+
+/* Übergeordnete Seitennavigation */
+.main-nav { display: flex; height: 100%; align-items: center; gap: 10px; }
+.nav-link { display: flex; height: 100%; align-items: center; padding: 0 15px; border-bottom: 2px solid transparent; color: var(--muted); font-weight: 600; text-decoration: none; transition: color .2s, border-color .2s; }
+.nav-link:hover, .nav-link:focus-visible, .nav-link.active { border-bottom-color: var(--green); color: var(--green); }
+.nav-group { position: relative; height: 100%; }
+.subnav { position: absolute; z-index: 10; top: calc(100% - 1px); left: 0; min-width: 170px; padding: 8px; border: 1px solid var(--line); border-radius: 0 0 12px 12px; visibility: hidden; opacity: 0; background: var(--paper); box-shadow: 0 12px 30px #263d311a; transform: translateY(-5px); transition: .2s; }
+.subnav a { display: block; padding: 10px 12px; border-radius: 8px; color: var(--ink); font-size: 14px; font-weight: 600; text-decoration: none; white-space: nowrap; }
+.subnav a:hover, .subnav a:focus-visible, .subnav a[aria-current="page"] { color: var(--green); background: var(--mint); }
+.nav-group:hover .subnav, .nav-group:focus-within .subnav { visibility: visible; opacity: 1; transform: translateY(0); }
+.empty-page { min-height: calc(100vh - 84px); }
+
+@media (max-width: 620px) {
+  .site-header { align-items: stretch; }
+  .main-nav { gap: 0; }
+  .nav-link { padding-inline: 11px; font-size: 14px; }
+  .site-header .demo-badge { align-self: center; }
+  .empty-page { min-height: calc(100vh - 70px); }
+}
