@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Künstlerinnen und Künstler im Überblick.">
   <title>Kunst</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
@@ -18,7 +22,39 @@
         </div>
       </nav>
     </header>
-    <main class="empty-page" aria-label="Kunst"></main>
+    <main class="art-page">
+      <section class="art-intro" aria-labelledby="page-title">
+        <span class="eyebrow">Kunst</span>
+        <h1 id="page-title">Künstlerinnen und Künstler</h1>
+      </section>
+
+      <section class="artist-grid" aria-label="Künstlerübersicht">
+        <article class="artist-card">
+          <a class="artist-image-link" href="laleh-barzegar.html" aria-label="Zur Künstlerseite von Laleh Barzegar">
+            <img src="../bilder/artists/laleh/p1.jpg" alt="Laleh Barzegar">
+          </a>
+          <p class="artist-name">Laleh Barzegar</p>
+        </article>
+
+        <article class="artist-card">
+          <a class="artist-image-link" href="hassan-kayvan.html" aria-label="Zur Künstlerseite von Hassan Kayvan">
+            <img src="../bilder/artists/hassan/hassan1.png" alt="Hassan Kayvan">
+          </a>
+          <p class="artist-name">Hassan Kayvan</p>
+        </article>
+
+        <article class="artist-card">
+          <a class="artist-image-link" href="shabrokh-golbaz.html" aria-label="Zur Künstlerseite von Shabrokh Golbaz">
+            <img src="../bilder/artists/shabrokh/shabrokh.png" alt="Shabrokh Golbaz">
+          </a>
+          <p class="artist-name">Shabrokh Golbaz</p>
+        </article>
+
+        <article class="artist-card artist-card-placeholder">
+          <span>Künstlerkarte</span>
+        </article>
+      </section>
+    </main>
   </div>
   <script src="../scr/script.js"></script>
 </body>
