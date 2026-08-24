@@ -89,6 +89,33 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
   footer { flex-direction: column; gap: 8px; align-items: center; }.demo-badge { padding: 6px 9px; }
 }
 
+/* Künstlerübersicht und Künstlerseiten */
+.art-page { padding-bottom: 64px; }
+.art-intro { padding: 72px 0 45px; }
+.artist-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; width: 100%; margin-inline: auto; }
+.artist-card { display: grid; height: 300px; overflow: hidden; grid-template-rows: 220px 1fr; border: 5px solid var(--line); border-radius: var(--radius); color: var(--ink); background: var(--paper); box-shadow: 0 12px 30px #263d310d; font-weight: 700; text-align: center; text-decoration: none; transition: border-color .2s, box-shadow .2s, transform .2s; }
+.artist-card img { width: 100%; height: 100%; object-fit: cover; }
+.artist-card > span { display: grid; min-width: 0; padding: 12px; place-items: center; }
+a.artist-card:hover { border-color: #bddfca; box-shadow: 0 16px 34px #263d3117; transform: translateY(-2px); }
+.artist-card-placeholder { grid-template-rows: 1fr; }
+.artist-page { min-height: calc(100vh - 84px); padding: 72px 0 64px; }
+.artist-page .back-link { display: inline-flex; margin-bottom: 28px; color: var(--green); font-weight: 700; text-decoration: none; }
+.artist-page .back-link:hover { color: var(--green-dark); }
+
+@media (max-width: 780px) {
+  .artist-grid { max-width: 560px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+}
+
+@media (max-width: 620px) {
+  .art-page { padding-bottom: 40px; }
+  .art-intro { padding: 52px 4px 32px; }
+  .artist-page { min-height: calc(100vh - 70px); padding: 52px 4px 40px; }
+}
+
+@media (max-width: 430px) {
+  .artist-grid { max-width: 280px; grid-template-columns: 1fr; }
+}
+
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
 
 /* Übergeordnete Seitennavigation */
