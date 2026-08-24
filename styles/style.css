@@ -109,3 +109,27 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
   .site-header .demo-badge { align-self: center; }
   .empty-page { min-height: calc(100vh - 70px); }
 }
+
+/* AI & Me Projektübersicht */
+.projects-page { padding-bottom: 64px; }
+.projects-intro { max-width: 690px; padding: 72px 0 45px; }
+.projects-intro p, .projects-heading p, .project-card p, .projects-note { color: var(--muted); line-height: 1.65; }
+.projects-intro p { max-width: 600px; margin: 0; font-size: 17px; }
+.projects-section { padding: clamp(24px, 5vw, 44px); border: 1px solid #e4eae6; border-radius: 24px; background: var(--paper); box-shadow: 0 18px 50px #263d3112; }
+.projects-heading { margin-bottom: 28px; }
+.projects-heading p { margin: 7px 0 0; font-size: 14px; }
+.project-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr)); gap: 20px; }
+.project-card { display: flex; min-height: 220px; flex-direction: column; padding: 26px; border: 1px solid var(--line); border-radius: var(--radius); background: #fbfdfc; }
+.project-card h3 { margin: 0; font-size: 20px; }
+.project-card p { margin: 12px 0 24px; font-size: 14px; }
+.project-link { display: inline-flex; width: fit-content; align-items: center; gap: 9px; margin-top: auto; padding: 11px 16px; border-radius: 11px; color: white; background: var(--green); box-shadow: 0 7px 16px #176b4628; font-size: 14px; font-weight: 700; text-decoration: none; transition: background .2s, transform .2s; }
+.project-link:hover { background: var(--green-dark); transform: translateY(-1px); }
+.projects-note { margin: 24px 0 0; font-size: 13px; }
+
+@media (max-width: 620px) {
+  .projects-page { padding-bottom: 40px; }
+  .projects-intro { padding: 52px 4px 32px; }
+  .projects-intro p { font-size: 15px; }
+  .projects-section { border-radius: 19px; }
+  .project-grid { grid-template-columns: 1fr; }
+}
