@@ -92,7 +92,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 /* Künstlerübersicht und Künstlerseiten */
 .art-page { padding-bottom: 64px; }
 .art-intro { padding: 72px 0 45px; }
-.artist-grid { display: grid; grid-template-columns: repeat(2, 30%); justify-content: center; gap: 24px; width: 100%; margin-inline: auto; }
+.artist-grid { position: relative; left: 50%; display: grid; width: 70vw; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-inline: auto; transform: translateX(-50%); }
 .artist-card { display: grid; height: 300px; overflow: hidden; grid-template-rows: 220px 1fr; border: 5px solid var(--line); border-radius: var(--radius); color: var(--ink); background: var(--paper); box-shadow: 0 12px 30px #263d310d; font-weight: 700; text-align: center; }
 .artist-image-link { display: block; min-width: 0; overflow: hidden; background: var(--background); transition: background .2s; }
 .artist-image-link img { display: block; width: 100%; height: 100%; object-fit: contain; }
@@ -107,11 +107,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 @media (max-width: 620px) {
   .art-page { padding-bottom: 40px; }
   .art-intro { padding: 52px 4px 32px; }
+  .artist-grid { width: 90vw; grid-template-columns: minmax(0, 1fr); }
   .artist-page { min-height: calc(100vh - 70px); padding: 52px 4px 40px; }
-}
-
-@media (max-width: 430px) {
-  .artist-grid { max-width: 280px; grid-template-columns: minmax(0, 1fr); }
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
