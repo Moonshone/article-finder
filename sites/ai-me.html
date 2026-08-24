@@ -3,7 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Übersicht der KI-Projekte von AI &amp; Me.">
   <title>AI &amp; Me</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/style.css">
 </head>
 <body>
@@ -14,11 +18,35 @@
         <a class="nav-link" href="kunst.html">Kunst</a>
         <div class="nav-group">
           <a class="nav-link active" href="ai-me.html" aria-current="page">AI &amp; Me</a>
-          <div class="subnav"><span>Test-Projekte</span><a href="ai-me/test-projekte/article-finder.html">Article Finder</a></div>
+          <div class="subnav"><span>Test-Projekte</span><a href="article-finder.html">Article-Finder</a></div>
         </div>
       </nav>
     </header>
-    <main class="empty-page" aria-label="AI und me"></main>
+
+    <main class="projects-page">
+      <section class="projects-intro" aria-labelledby="page-title">
+        <span class="eyebrow">Projektübersicht</span>
+        <h1 id="page-title">AI<span>&amp;me</span></h1>
+        <p>Hier findest du meine KI-Projekte, übersichtlich nach Bereichen gegliedert.</p>
+      </section>
+
+      <section class="projects-section" aria-labelledby="test-projects-heading">
+        <div class="projects-heading">
+          <h2 id="test-projects-heading">Test-Projekte</h2>
+          <p>Erste Anwendungen zum Ausprobieren und Weiterentwickeln.</p>
+        </div>
+
+        <div class="project-grid">
+          <article class="project-card">
+            <h3>Article-Finder</h3>
+            <p>Findet Artikelangebote bei Supermärkten im gewünschten Umkreis.</p>
+            <a href="article-finder.html" class="project-link">Projekt öffnen <span aria-hidden="true">→</span></a>
+          </article>
+        </div>
+
+        <p class="projects-note">Weitere Projekte können später hier ergänzt werden.</p>
+      </section>
+    </main>
   </div>
   <script src="../scr/script.js"></script>
 </body>
