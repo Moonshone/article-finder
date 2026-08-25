@@ -1202,10 +1202,6 @@ if (elements.form) {
   updateEmailState();
 }
 
-
-
-
-
 const SLIDESHOW_INTERVAL = 6000;
 
 async function initializeArtistSlideshow(slideshow) {

@@ -103,7 +103,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .artist-page { min-height: calc(100vh - 84px); padding: 72px 0 64px; }
 .artist-page .back-link { display: inline-flex; margin-bottom: 28px; color: var(--green); font-weight: 700; text-decoration: none; }
 .artist-page .back-link:hover { color: var(--green-dark); }
-.artist-slideshow { position: relative; left: 50%; display: grid; width: 50vw; max-width: calc(100vw - 40px); min-height: 160px; margin-top: 36px; place-items: center; overflow: hidden; transform: translateX(-50%); }
+.artist-slideshow { position: relative; left: 50%; display: grid; width: 40vw; max-width: calc(100vw - 40px); min-height: 128px; margin-top: 36px; place-items: center; overflow: hidden; transform: translateX(-50%); }
 .artist-slideshow-image { display: block; width: 100%; height: auto; }
 .artist-slideshow-status { margin: 0; padding: 32px; color: var(--muted); font-size: 14px; text-align: center; }
 
@@ -112,7 +112,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
   .art-intro { padding: 52px 4px 32px; }
   .artist-grid { width: 90vw; grid-template-columns: minmax(0, 1fr); }
   .artist-page { min-height: calc(100vh - 70px); padding: 52px 4px 40px; }
-  .artist-slideshow { width: 90vw; max-width: 100vw; margin-top: 28px; }
+  .artist-slideshow { width: 72vw; max-width: 100vw; margin-top: 28px; }
 }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
