@@ -30,7 +30,7 @@ async function initializeArtistGallery(gallery) {
     toolbar.className = "artist-gallery__toolbar";
     const heading = document.createElement("span");
     heading.className = "artist-gallery__heading";
-    heading.textContent = "Werke";
+    heading.textContent = "Bildergalerie";
     const controls = document.createElement("div");
     controls.className = "artist-gallery__controls";
     const previous = galleryButton("artist-gallery__control", "Vorheriges Kunstwerk", "‹");
