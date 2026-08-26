@@ -1,4 +1,5 @@
-const GALLERY_FADE_DURATION = 160;
+const GALLERY_FADE_DURATION = 400;
+const GALLERY_SLIDE_DURATION = 5000;
 
 function galleryButton(className, label, content) {
   const button = document.createElement("button");
@@ -58,6 +59,7 @@ async function initializeArtistGallery(gallery) {
 
     let currentIndex = 0;
     let changeSequence = 0;
+    let slideshowTimer = null;
     const thumbnails = data.images.map((source, index) => {
       const thumbnail = galleryButton("artist-gallery__thumbnail", `Kunstwerk ${index + 1} von ${data.images.length} anzeigen`, "");
       const image = document.createElement("img");
@@ -86,8 +88,24 @@ async function initializeArtistGallery(gallery) {
       if (shouldFocusThumbnail) thumbnails[currentIndex].focus({ preventScroll: true });
     }
 
+    function stopSlideshow() {
+      if (slideshowTimer !== null) clearTimeout(slideshowTimer);
+      slideshowTimer = null;
+    }
+
+    function startSlideshow() {
+      stopSlideshow();
+      if (data.images.length < 2) return;
+      slideshowTimer = setTimeout(() => selectArtwork(currentIndex + 1), GALLERY_SLIDE_DURATION);
+    }
+
     async function selectArtwork(index) {
-      if (index === currentIndex || data.images.length === 0) return;
+      stopSlideshow();
+      if (data.images.length === 0) return;
+      if ((index + data.images.length) % data.images.length === currentIndex) {
+        startSlideshow();
+        return;
+      }
       const sequence = ++changeSequence;
       mainImage.getAnimations().forEach((animation) => animation.cancel());
       try {
@@ -103,6 +121,7 @@ async function initializeArtistGallery(gallery) {
       mainImage.animate([{ opacity: 0 }, { opacity: 1 }], {
         duration: GALLERY_FADE_DURATION, easing: "ease-out", fill: "both"
       });
+      startSlideshow();
     }
 
     const move = (direction) => selectArtwork(currentIndex + direction);
@@ -144,6 +163,7 @@ async function initializeArtistGallery(gallery) {
     next.disabled = onlyOne;
     updateSelection(0);
     updateStripNavigation();
+    startSlideshow();
   } catch (error) {
     status.textContent = "Derzeit sind keine Werke verfügbar.";
   }
