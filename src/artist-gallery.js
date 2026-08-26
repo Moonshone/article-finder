@@ -1,39 +1,12 @@
-const GALLERY_ANIMATION_DURATION = 500;
+const GALLERY_FADE_DURATION = 160;
 
-function createGalleryFrame(modifier) {
-  const frame = document.createElement("div");
-  frame.className = `artist-gallery__frame artist-gallery__frame--${modifier}`;
-  const image = document.createElement("img");
-  image.className = "artist-gallery__image";
-  image.alt = "";
-  frame.append(image);
-  return frame;
-}
-
-function createGalleryButton(modifier, label, symbol) {
+function galleryButton(className, label, content) {
   const button = document.createElement("button");
-  button.className = `artist-gallery__button artist-gallery__button--${modifier}`;
   button.type = "button";
+  button.className = className;
   button.setAttribute("aria-label", label);
-  button.textContent = symbol;
+  button.textContent = content;
   return button;
-}
-
-function createMovingArtwork(image, start, end) {
-  const layer = document.createElement("div");
-  layer.className = "artist-gallery__animation-layer";
-  Object.assign(layer.style, {
-    top: `${start.top}px`, left: `${start.left}px`,
-    width: `${start.width}px`, height: `${start.height}px`
-  });
-  layer.append(image.cloneNode());
-  document.body.append(layer);
-  const animation = layer.animate([
-    { top: `${start.top}px`, left: `${start.left}px`, width: `${start.width}px`, height: `${start.height}px` },
-    { top: `${end.top}px`, left: `${end.left}px`, width: `${end.width}px`, height: `${end.height}px` }
-  ], { duration: GALLERY_ANIMATION_DURATION, easing: "cubic-bezier(.4, 0, .2, 1)", fill: "forwards" });
-  animation.finished.finally(() => layer.remove());
-  return animation.finished;
 }
 
 async function initializeArtistGallery(gallery) {
@@ -45,70 +18,132 @@ async function initializeArtistGallery(gallery) {
     const data = await response.json();
     if (!Array.isArray(data.images) || data.images.length === 0) throw new Error("Keine Werke");
 
-    const previousFrame = createGalleryFrame("preview");
-    const currentFrame = createGalleryFrame("current");
-    const nextFrame = createGalleryFrame("preview");
-    const previousButton = createGalleryButton("previous", "Vorheriges Kunstwerk anzeigen", "→");
-    const nextButton = createGalleryButton("next", "Nächstes Kunstwerk anzeigen", "←");
-    gallery.replaceChildren(previousFrame, previousButton, currentFrame, nextButton, nextFrame);
+    const stage = document.createElement("div");
+    stage.className = "artist-gallery__stage";
+    const mainImage = document.createElement("img");
+    mainImage.className = "artist-gallery__main-image";
+    mainImage.decoding = "async";
+    stage.append(mainImage);
 
-    const frames = [previousFrame, currentFrame, nextFrame];
-    const images = frames.map((frame) => frame.querySelector("img"));
-    let currentIndex = 0;
-    let isAnimating = false;
+    const toolbar = document.createElement("div");
+    toolbar.className = "artist-gallery__toolbar";
+    const heading = document.createElement("span");
+    heading.className = "artist-gallery__heading";
+    heading.textContent = "Werke";
+    const controls = document.createElement("div");
+    controls.className = "artist-gallery__controls";
+    const previous = galleryButton("artist-gallery__control", "Vorheriges Kunstwerk", "‹");
+    const next = galleryButton("artist-gallery__control", "Nächstes Kunstwerk", "›");
+    const fullscreen = galleryButton("artist-gallery__control artist-gallery__fullscreen", "Galerie im Vollbild anzeigen", "⛶");
+    controls.append(previous, next, fullscreen);
+    toolbar.append(heading, controls);
+
+    const filmstrip = document.createElement("div");
+    filmstrip.className = "artist-gallery__filmstrip";
+    const scrollPrevious = galleryButton("artist-gallery__strip-nav", "Thumbnail-Leiste nach links bewegen", "‹");
+    const viewport = document.createElement("div");
+    viewport.className = "artist-gallery__thumb-viewport";
+    const thumbList = document.createElement("div");
+    thumbList.className = "artist-gallery__thumb-strip";
+    viewport.append(thumbList);
+    const scrollNext = galleryButton("artist-gallery__strip-nav", "Thumbnail-Leiste nach rechts bewegen", "›");
+    filmstrip.append(scrollPrevious, viewport, scrollNext);
+
+    const caption = document.createElement("p");
+    caption.className = "artist-gallery__caption";
+    caption.hidden = true;
+    gallery.replaceChildren(stage, toolbar, filmstrip, caption);
+    gallery.tabIndex = 0;
     gallery.dataset.artworkCount = `${data.images.length}`;
 
-    function render() {
-      const last = data.images.length - 1;
-      const indexes = [(currentIndex - 1 + data.images.length) % data.images.length, currentIndex, (currentIndex + 1) % data.images.length];
-      images.forEach((image, index) => { image.src = data.images[indexes[index]]; });
-      images[1].alt = `Kunstwerk ${currentIndex + 1} von ${data.images.length}`;
-      previousButton.disabled = data.images.length < 2;
-      nextButton.disabled = data.images.length < 2;
+    let currentIndex = 0;
+    let changeSequence = 0;
+    const thumbnails = data.images.map((source, index) => {
+      const thumbnail = galleryButton("artist-gallery__thumbnail", `Kunstwerk ${index + 1} von ${data.images.length} anzeigen`, "");
+      const image = document.createElement("img");
+      image.src = source;
+      image.alt = "";
+      image.loading = index === 0 ? "eager" : "lazy";
+      image.decoding = "async";
+      thumbnail.append(image);
+      thumbnail.addEventListener("click", () => selectArtwork(index));
+      thumbList.append(thumbnail);
+      return thumbnail;
+    });
+
+    function updateSelection(index, shouldFocusThumbnail = false) {
+      currentIndex = (index + data.images.length) % data.images.length;
       gallery.dataset.currentArtwork = `${currentIndex + 1}`;
-      gallery.dataset.lastArtwork = `${last + 1}`;
+      mainImage.src = data.images[currentIndex];
+      mainImage.alt = `Kunstwerk ${currentIndex + 1} von ${data.images.length}`;
+      thumbnails.forEach((thumbnail, thumbnailIndex) => {
+        const active = thumbnailIndex === currentIndex;
+        thumbnail.classList.toggle("artist-gallery__thumbnail--active", active);
+        if (active) thumbnail.setAttribute("aria-current", "true");
+        else thumbnail.removeAttribute("aria-current");
+      });
+      thumbnails[currentIndex].scrollIntoView({ behavior: "smooth", block: "nearest", inline: "nearest" });
+      if (shouldFocusThumbnail) thumbnails[currentIndex].focus({ preventScroll: true });
     }
 
-    async function move(direction) {
-      if (isAnimating || data.images.length < 2) return;
-      isAnimating = true;
-      previousButton.disabled = true;
-      nextButton.disabled = true;
-      const rects = frames.map((frame) => frame.getBoundingClientRect());
-      const incoming = direction > 0 ? 2 : 0;
-      const outgoingTarget = direction > 0 ? 0 : 2;
-
-      if (rects[incoming].width === 0) {
-        await currentFrame.animate([
-          { opacity: 1, transform: "translateX(0) scale(1)" },
-          { opacity: 0, transform: `translateX(${-direction * 16}px) scale(.96)` }
-        ], { duration: GALLERY_ANIMATION_DURATION / 2, easing: "ease-in", fill: "forwards" }).finished;
-        currentIndex = (currentIndex + direction + data.images.length) % data.images.length;
-        render();
-        await currentFrame.animate([
-          { opacity: 0, transform: `translateX(${direction * 16}px) scale(.96)` },
-          { opacity: 1, transform: "translateX(0) scale(1)" }
-        ], { duration: GALLERY_ANIMATION_DURATION / 2, easing: "ease-out" }).finished;
-        isAnimating = false;
-        return;
+    async function selectArtwork(index) {
+      if (index === currentIndex || data.images.length === 0) return;
+      const sequence = ++changeSequence;
+      mainImage.getAnimations().forEach((animation) => animation.cancel());
+      try {
+        await mainImage.animate([{ opacity: 1 }, { opacity: 0 }], {
+          duration: GALLERY_FADE_DURATION, easing: "ease-in", fill: "forwards"
+        }).finished;
+      } catch (_) {
+        // A newer selection deliberately cancelled this transition.
       }
-
-      images.forEach((image) => { image.style.visibility = "hidden"; });
-
-      await Promise.all([
-        createMovingArtwork(images[incoming], rects[incoming], rects[1]),
-        createMovingArtwork(images[1], rects[1], rects[outgoingTarget])
-      ]);
-
-      currentIndex = (currentIndex + direction + data.images.length) % data.images.length;
-      render();
-      images.forEach((image) => { image.style.visibility = ""; });
-      isAnimating = false;
+      if (sequence !== changeSequence) return;
+      updateSelection(index);
+      mainImage.getAnimations().forEach((animation) => animation.cancel());
+      mainImage.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: GALLERY_FADE_DURATION, easing: "ease-out", fill: "both"
+      });
     }
 
-    previousButton.addEventListener("click", () => move(-1));
-    nextButton.addEventListener("click", () => move(1));
-    render();
+    const move = (direction) => selectArtwork(currentIndex + direction);
+    previous.addEventListener("click", () => move(-1));
+    next.addEventListener("click", () => move(1));
+    scrollPrevious.addEventListener("click", () => viewport.scrollBy({ left: -viewport.clientWidth * 0.8, behavior: "smooth" }));
+    scrollNext.addEventListener("click", () => viewport.scrollBy({ left: viewport.clientWidth * 0.8, behavior: "smooth" }));
+    gallery.addEventListener("keydown", (event) => {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") return;
+      event.preventDefault();
+      move(event.key === "ArrowLeft" ? -1 : 1);
+    });
+
+    if (gallery.requestFullscreen) {
+      fullscreen.addEventListener("click", () => {
+        if (document.fullscreenElement === gallery) document.exitFullscreen();
+        else gallery.requestFullscreen();
+      });
+      document.addEventListener("fullscreenchange", () => {
+        const active = document.fullscreenElement === gallery;
+        gallery.classList.toggle("artist-gallery--fullscreen", active);
+        fullscreen.textContent = active ? "×" : "⛶";
+        fullscreen.setAttribute("aria-label", active ? "Vollbildansicht schließen" : "Galerie im Vollbild anzeigen");
+      });
+    } else {
+      fullscreen.hidden = true;
+    }
+
+    function updateStripNavigation() {
+      const overflows = viewport.scrollWidth > viewport.clientWidth + 1;
+      scrollPrevious.hidden = !overflows;
+      scrollNext.hidden = !overflows;
+      filmstrip.classList.toggle("artist-gallery__filmstrip--static", !overflows);
+    }
+    new ResizeObserver(updateStripNavigation).observe(viewport);
+    window.addEventListener("load", updateStripNavigation, { once: true });
+    const onlyOne = data.images.length === 1;
+    previous.disabled = onlyOne;
+    next.disabled = onlyOne;
+    updateSelection(0);
+    updateStripNavigation();
   } catch (error) {
     status.textContent = "Derzeit sind keine Werke verfügbar.";
   }
