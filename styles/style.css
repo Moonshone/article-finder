@@ -103,11 +103,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .artist-page { min-height: calc(100vh - 84px); padding: 48px 0 72px; }
 .artist-page .back-link { display: inline-flex; margin-bottom: 28px; color: var(--green); font-weight: 700; text-decoration: none; }
 .artist-page .back-link:hover { color: var(--green-dark); }
-.artist-page__content { position: relative; left: 50%; display: grid; width: min(1200px, calc(100vw - 40px)); grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); gap: clamp(20px, 3vw, 40px); align-items: stretch; transform: translateX(-50%); }
-.artist-profile { display: grid; grid-template-columns: 1fr; gap: 24px; align-content: start; padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
-.artist-profile__portrait { display: block; width: 100%; aspect-ratio: 1; border-radius: 20px; object-fit: cover; }
+.artist-page__content { position: relative; left: 50%; display: grid; width: min(1200px, calc(100vw - 40px)); grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); gap: clamp(20px, 3vw, 40px); align-items: start; transform: translateX(-50%); }
+.artist-profile { display: grid; min-width: 0; grid-template-columns: 1fr; gap: 24px; align-content: start; padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
+.artist-profile__portrait { display: block; width: min(100%, 220px); height: 220px; border-radius: 20px; object-fit: contain; }
 .artist-profile__text h1 { margin-bottom: 0; }
-.artist-gallery { min-width: 0; overflow: hidden; color: var(--paper); background: var(--ink); }
+.artist-gallery { width: 100%; min-width: 0; overflow: hidden; color: var(--paper); background: var(--ink); }
 .artist-gallery__stage { display: flex; width: 100%; height: clamp(420px, 68vh, 760px); align-items: center; justify-content: center; padding: clamp(18px, 3vw, 38px); background: var(--ink); }
 .artist-gallery__main-image { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
 .artist-gallery__toolbar { display: flex; min-height: 46px; align-items: center; justify-content: space-between; padding: 4px 12px 4px 18px; border-block: 1px solid var(--muted); background: var(--ink); }
@@ -131,9 +131,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .artist-gallery:fullscreen .artist-gallery__filmstrip { flex: 0 0 auto; }
 .artist-slideshow-status { margin: 0; padding: 32px; color: var(--muted); font-size: 14px; text-align: center; }
 
-@media (max-width: 800px) {
+@media (max-width: 700px) {
   .artist-page__content { width: calc(100vw - 32px); grid-template-columns: minmax(0, 1fr); gap: 28px; }
-  .artist-profile__portrait { width: min(100%, 300px); }
 }
 
 @media (max-width: 620px) {
@@ -143,7 +142,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
   .artist-page { min-height: calc(100vh - 70px); padding: 36px 4px 48px; }
   .artist-page__content { width: calc(100vw - 16px); grid-template-columns: minmax(0, 1fr); gap: 24px; }
   .artist-profile { gap: 24px; padding: 20px; }
-  .artist-profile__portrait { width: min(100%, 260px); }
   .artist-gallery__stage { height: clamp(300px, 52vh, 480px); padding: 12px; }
   .artist-gallery__toolbar { padding-left: 13px; }
   .artist-gallery__filmstrip { grid-template-columns: 34px minmax(0, 1fr) 34px; padding: 10px 2px; }
