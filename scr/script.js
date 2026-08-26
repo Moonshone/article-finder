@@ -1201,36 +1201,3 @@ if (elements.form) {
 
   updateEmailState();
 }
-
-const SLIDESHOW_INTERVAL = 6000;
-
-async function initializeArtistSlideshow(slideshow) {
-  const artist = slideshow.dataset.artist;
-  const status = slideshow.querySelector(".artist-slideshow-status");
-
-  try {
-    const response = await fetch(`/api/artworks.php?artist=${encodeURIComponent(artist)}`);
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-
-    const data = await response.json();
-    if (!Array.isArray(data.images) || data.images.length === 0) throw new Error("Keine Werke");
-
-    const image = document.createElement("img");
-    image.className = "artist-slideshow-image";
-    image.alt = "";
-    image.src = data.images[0];
-    slideshow.replaceChildren(image);
-
-    if (data.images.length === 1) return;
-
-    let currentImage = 0;
-    window.setInterval(() => {
-      currentImage = (currentImage + 1) % data.images.length;
-      image.src = data.images[currentImage];
-    }, SLIDESHOW_INTERVAL);
-  } catch (error) {
-    status.textContent = "Derzeit sind keine Werke verfügbar.";
-  }
-}
-
-document.querySelectorAll(".artist-slideshow").forEach(initializeArtistSlideshow);

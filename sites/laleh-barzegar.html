@@ -24,13 +24,19 @@
     </header>
     <main class="artist-page">
       <a class="back-link" href="kunst.html"><span aria-hidden="true">←</span>&nbsp; Zurück zu Kunst</a>
-      <span class="eyebrow">Künstlerin</span>
-      <h1>Laleh Barzegar</h1>
-      <section class="artist-slideshow" data-artist="laleh" aria-label="Werke von Laleh Barzegar">
+      <section class="artist-profile" aria-labelledby="artist-name">
+        <img class="artist-profile__portrait" src="../bilder/artists/laleh/p1.jpg" alt="Laleh Barzegar">
+        <div class="artist-profile__text">
+          <span class="eyebrow">Künstlerin</span>
+          <h1 id="artist-name">Laleh Barzegar</h1>
+        </div>
+      </section>
+      <section class="artist-gallery" data-artist="laleh" aria-label="Werke von Laleh Barzegar">
         <p class="artist-slideshow-status" role="status">Werke werden geladen …</p>
       </section>
     </main>
   </div>
   <script src="../scr/script.js"></script>
+  <script src="../scr/artist-gallery.js"></script>
 </body>
 </html>

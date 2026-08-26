@@ -24,13 +24,19 @@
     </header>
     <main class="artist-page">
       <a class="back-link" href="kunst.html"><span aria-hidden="true">←</span>&nbsp; Zurück zu Kunst</a>
-      <span class="eyebrow">Künstlerin</span>
-      <h1>Shabrokh Golbaz</h1>
-      <section class="artist-slideshow" data-artist="shabrokh" aria-label="Werke von Shabrokh Golbaz">
+      <section class="artist-profile" aria-labelledby="artist-name">
+        <img class="artist-profile__portrait" src="../bilder/artists/shabrokh/shabrokh.png" alt="Shabrokh Golbaz">
+        <div class="artist-profile__text">
+          <span class="eyebrow">Künstlerin</span>
+          <h1 id="artist-name">Shabrokh Golbaz</h1>
+        </div>
+      </section>
+      <section class="artist-gallery" data-artist="shabrokh" aria-label="Werke von Shabrokh Golbaz">
         <p class="artist-slideshow-status" role="status">Werke werden geladen …</p>
       </section>
     </main>
   </div>
   <script src="../scr/script.js"></script>
+  <script src="../scr/artist-gallery.js"></script>
 </body>
 </html>
