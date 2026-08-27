@@ -107,6 +107,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .artist-profile { display: grid; min-width: 0; grid-template-columns: 1fr; gap: 24px; align-content: start; padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
 .artist-profile__portrait { display: block; width: min(100%, 220px); height: 220px; border-radius: 20px; object-fit: contain; }
 .artist-profile__text h1 { margin-bottom: 0; }
+.artist-profile__description { white-space: pre-line; }
 .artist-gallery { width: 100%; min-width: 0; overflow: hidden; color: var(--ink); background-color: #e6f5ed; }
 .artist-gallery__stage { display: flex; width: 100%; height: clamp(420px, 68vh, 760px); align-items: center; justify-content: center; padding: clamp(18px, 3vw, 38px); background-color: #e6f5ed; }
 .artist-gallery__main-image { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }
