@@ -1253,6 +1253,7 @@ async function loadArtistDescription() {
   } catch (error) {
 
     descriptionElement.textContent = "";
+    console.error("Künstlerbeschreibung konnte nicht geladen werden:", error);
   }
 }
 

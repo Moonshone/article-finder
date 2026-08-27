@@ -7,7 +7,7 @@ header('Cache-Control: no-store');
 
 $artistId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
-if (!in_array($artistId, [2, 3, 4], true)) {
+if ($artistId === false || $artistId === null || $artistId < 1) {
     http_response_code(400);
     echo json_encode(['error' => 'Ungültige Künstler-ID.'], JSON_UNESCAPED_UNICODE);
     exit;
@@ -22,18 +22,28 @@ try {
 
         if ($databaseConfig instanceof PDO) {
             $pdo = $databaseConfig;
+        } elseif (is_array($databaseConfig)) {
+            $host = $databaseConfig['host'] ?? null;
+            $port = $databaseConfig['port'] ?? '3306';
+            $user = $databaseConfig['user'] ?? ($databaseConfig['username'] ?? null);
+            $password = $databaseConfig['password'] ?? null;
+            $database = $databaseConfig['database'] ?? ($databaseConfig['dbname'] ?? 's02u4284_nema_data');
         }
     }
 
     if (!$pdo instanceof PDO) {
-        $host = getenv('DB_HOST');
-        $port = getenv('DB_PORT') ?: '3306';
-        $user = getenv('DB_USER');
-        $password = getenv('DB_PASSWORD');
-        $database = getenv('DB_NAME') ?: 's02u4284_nema_data';
+        $host = $host ?? getenv('DB_HOST');
+        $port = $port ?? (getenv('DB_PORT') ?: '3306');
+        $user = $user ?? getenv('DB_USER');
+        $password = $password ?? getenv('DB_PASSWORD');
+        $database = $database ?? (getenv('DB_NAME') ?: 's02u4284_nema_data');
 
-        if ($host === false || $host === '' || $user === false || $user === '' || $password === false) {
+        if (!$host || !$user || $password === false || $password === null) {
             throw new RuntimeException('Database credentials are not configured.');
+        }
+
+        if (!in_array('mysql', PDO::getAvailableDrivers(), true)) {
+            throw new RuntimeException('The PDO MySQL driver is not available.');
         }
 
         $pdo = new PDO(
