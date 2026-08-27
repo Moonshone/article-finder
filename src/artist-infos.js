@@ -2,7 +2,7 @@ async function loadArtistDescription(descriptionElement) {
   const artistId = descriptionElement.dataset.artistId;
 
   try {
-    const response = await fetch(`/api/artist-description.php?id=${encodeURIComponent(artistId)}`, {
+    const response = await fetch(`/api/artist-infos.php?id=${encodeURIComponent(artistId)}`, {
       cache: "no-store"
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
