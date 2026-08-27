@@ -1201,3 +1201,60 @@ if (elements.form) {
 
   updateEmailState();
 }
+
+
+// ======================================================
+// Künstlerbeschreibung
+// ======================================================
+
+async function loadArtistDescription() {
+
+  const descriptionElement =
+    document.querySelector(
+      ".artist-profile__description"
+    );
+
+
+  if (!descriptionElement) {
+    return;
+  }
+
+
+  const artistId =
+    descriptionElement.dataset.artistId;
+
+
+  if (!artistId) {
+    return;
+  }
+
+
+  try {
+
+    const response =
+      await fetch(
+        `/api/artist-infos.php?id=${encodeURIComponent(artistId)}`,
+        { cache: "no-store" }
+      );
+
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+
+    const data =
+      await response.json();
+
+
+    descriptionElement.textContent =
+      data.description || "";
+
+  } catch (error) {
+
+    descriptionElement.textContent = "";
+  }
+}
+
+
+loadArtistDescription();
