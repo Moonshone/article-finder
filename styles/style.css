@@ -103,12 +103,12 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .artist-page { min-height: calc(100vh - 84px); padding: 48px 0 72px; }
 .artist-page .back-link { display: inline-flex; margin-bottom: 28px; color: var(--green); font-weight: 700; text-decoration: none; }
 .artist-page .back-link:hover { color: var(--green-dark); }
-.artist-page__content { position: relative; left: 50%; display: grid; width: min(94vw, 1500px); grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); gap: clamp(16px, 1.5vw, 24px); align-items: stretch; transform: translateX(-50%); }
-.artist-profile { display: flex; height: 100%; min-width: 0; min-height: 0; overflow: hidden; flex-direction: column; gap: 24px; padding: clamp(24px, 3vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
+.artist-page__content { position: relative; left: 50%; display: grid; width: min(94vw, 1500px); grid-template-columns: minmax(0, 35fr) minmax(0, 65fr); gap: clamp(16px, 1.5vw, 24px); align-items: start; transform: translateX(-50%); }
+.artist-profile { display: flex; min-width: 0; min-height: 0; overflow: hidden; flex-direction: column; gap: 24px; padding: clamp(24px, 3vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: var(--paper); }
 .artist-profile__portrait { display: block; width: min(100%, 220px); height: 220px; border-radius: 20px; object-fit: contain; }
 .artist-profile__text { display: flex; min-height: 0; flex: 1; flex-direction: column; }
 .artist-profile__text h1 { margin-bottom: 0; }
-.artist-profile__description { min-height: 0; overflow-y: auto; flex: 1; white-space: pre-line; padding-right: 6px; }
+.artist-profile__description { min-height: 0; overflow-x: hidden; overflow-y: auto; flex: 1; white-space: pre-line; padding-right: 6px; }
 .artist-gallery { width: 100%; min-width: 0; overflow: hidden; color: var(--ink); background-color: #e6f5ed; }
 .artist-gallery__stage { display: flex; width: 100%; height: clamp(420px, 68vh, 760px); align-items: center; justify-content: center; padding: clamp(18px, 3vw, 38px); background-color: #e6f5ed; }
 .artist-gallery__main-image { display: block; width: auto; height: auto; max-width: 100%; max-height: 100%; object-fit: contain; }

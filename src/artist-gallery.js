@@ -1,6 +1,25 @@
 const GALLERY_FADE_DURATION = 400;
 const GALLERY_SLIDE_DURATION = 5000;
 
+function synchronizeArtistProfileHeight(gallery) {
+  const profile = gallery.closest(".artist-page__content")?.querySelector(".artist-profile");
+  if (!profile) return;
+
+  const desktopLayout = window.matchMedia("(min-width: 701px)");
+  const syncHeight = () => {
+    if (desktopLayout.matches && document.fullscreenElement !== gallery) {
+      profile.style.height = `${gallery.offsetHeight}px`;
+    } else if (!desktopLayout.matches) {
+      profile.style.removeProperty("height");
+    }
+  };
+
+  new ResizeObserver(syncHeight).observe(gallery);
+  desktopLayout.addEventListener("change", syncHeight);
+  document.addEventListener("fullscreenchange", syncHeight);
+  syncHeight();
+}
+
 function galleryButton(className, label, content) {
   const button = document.createElement("button");
   button.type = "button";
@@ -169,4 +188,7 @@ async function initializeArtistGallery(gallery) {
   }
 }
 
-document.querySelectorAll(".artist-gallery").forEach(initializeArtistGallery);
+document.querySelectorAll(".artist-gallery").forEach((gallery) => {
+  synchronizeArtistProfileHeight(gallery);
+  initializeArtistGallery(gallery);
+});
