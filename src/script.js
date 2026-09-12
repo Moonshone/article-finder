@@ -1259,3 +1259,34 @@ async function loadArtistDescription() {
 
 
 loadArtistDescription();
+
+
+// ======================================================
+// Dezente Einblendungen auf der Startseite
+// ======================================================
+
+const homeSections = document.querySelectorAll(".home-page .reveal");
+
+if (homeSections.length) {
+
+  if (
+    "IntersectionObserver" in window &&
+    !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  ) {
+    const revealObserver = new IntersectionObserver(
+      (entries, observer) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    homeSections.forEach((section) => revealObserver.observe(section));
+  } else {
+    homeSections.forEach((section) => section.classList.add("is-visible"));
+  }
+}
