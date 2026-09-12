@@ -3,24 +3,81 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Startseite">
-  <title>Home</title>
+  <meta name="description" content="NEMA — Kunst, Mensch und künstliche Intelligenz.">
+  <title>NEMA — Art · Human · AI</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles/style.css">
 </head>
-<body>
-  <div class="page-shell">
-    <header class="site-header">
-      <nav class="main-nav" aria-label="Hauptnavigation">
-        <a class="nav-link active" href="index.html" aria-current="page">Home</a>
-        <a class="nav-link" href="sites/kunst.html">Kunst</a>
-        <a class="nav-link" href="sites/ai-me.html">AI &amp; Me</a>
-      </nav>
-    </header>
-    <main class="empty-page" aria-label="Home"></main>
-  </div>
+<body class="home-page">
+  <header class="site-header home-header">
+    <nav class="main-nav" aria-label="Hauptnavigation">
+      <a class="nav-link active" href="index.html" aria-current="page">Home</a>
+      <a class="nav-link" href="sites/kunst.html">Kunst</a>
+      <a class="nav-link" href="sites/ai-me.html">AI &amp; Me</a>
+    </nav>
+  </header>
+
+  <main aria-label="Home">
+    <section class="home-hero" aria-labelledby="home-title">
+      <img class="home-hero__image" src="bilder/artists/hassan/hassan1.png" alt="" fetchpriority="high">
+      <div class="home-hero__veil" aria-hidden="true"></div>
+      <div class="home-hero__content">
+        <h1 id="home-title">NEMA</h1>
+        <p>ART <span aria-hidden="true">·</span> HUMAN <span aria-hidden="true">·</span> AI</p>
+        <a class="enter-link" href="#art">
+          <span>Enter</span>
+          <span class="enter-link__arrow" aria-hidden="true">↓</span>
+        </a>
+      </div>
+    </section>
+
+    <div class="home-editorial" id="art">
+      <section class="home-feature reveal" aria-labelledby="art-title">
+        <div class="home-feature__heading">
+          <h2 id="art-title">ART</h2>
+          <span class="home-feature__number" aria-hidden="true">01</span>
+        </div>
+        <a class="home-feature__media" href="sites/kunst.html" aria-label="Kunst entdecken">
+          <img src="bilder/artists/laleh/p1.jpg" alt="Kunstwerk von Laleh Barzegar" loading="lazy">
+        </a>
+        <div class="home-feature__footer">
+          <p>Artists, works and visual stories</p>
+          <a class="explore-link" href="sites/kunst.html">Explore <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="home-feature home-feature--reverse reveal" aria-labelledby="ai-title">
+        <div class="home-feature__heading">
+          <h2 id="ai-title">AI &amp; ME</h2>
+          <span class="home-feature__number" aria-hidden="true">02</span>
+        </div>
+        <a class="home-feature__media" href="sites/ai-me.html" aria-label="AI &amp; Me entdecken">
+          <img src="bilder/artists/hassan/hassan1.png" alt="Visuelle Studie zwischen Mensch und Maschine" loading="lazy">
+        </a>
+        <div class="home-feature__footer">
+          <p>Experiments between human imagination and machines</p>
+          <a class="explore-link" href="sites/ai-me.html">Explore <span aria-hidden="true">→</span></a>
+        </div>
+      </section>
+
+      <section class="home-feature reveal" aria-labelledby="stories-title">
+        <div class="home-feature__heading">
+          <h2 id="stories-title">STORIES</h2>
+          <span class="home-feature__number" aria-hidden="true">03</span>
+        </div>
+        <div class="home-feature__media">
+          <img src="bilder/artists/shabrokh/shabrokh.png" alt="Werk von Shabrokh Golbaz" loading="lazy">
+        </div>
+        <div class="home-feature__footer">
+          <p>Images, films and narratives</p>
+          <span class="explore-link explore-link--inactive" aria-disabled="true">Explore <span aria-hidden="true">→</span></span>
+        </div>
+      </section>
+    </div>
+  </main>
+
   <script src="src/script.js"></script>
 </body>
 </html>

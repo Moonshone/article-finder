@@ -89,6 +89,63 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
   footer { flex-direction: column; gap: 8px; align-items: center; }.demo-badge { padding: 6px 9px; }
 }
 
+/* Startseite: Enter NEMA */
+.home-page { overflow-x: hidden; background: var(--paper); }
+.home-page .home-header { position: absolute; z-index: 5; top: 0; left: 0; width: 100%; height: 84px; padding-inline: clamp(20px, 4vw, 64px); border: 0; }
+.home-page .home-header .nav-link { color: #fff; text-shadow: 0 1px 16px #0008; }
+.home-page .home-header .nav-link:hover,
+.home-page .home-header .nav-link:focus-visible,
+.home-page .home-header .nav-link.active { border-bottom-color: #fff; color: #fff; }
+.home-hero { position: relative; display: grid; width: 100%; min-height: 100vh; min-height: 100svh; overflow: hidden; place-items: center; color: #fff; background: var(--ink); }
+.home-hero__image,
+.home-hero__veil { position: absolute; inset: 0; width: 100%; height: 100%; }
+.home-hero__image { object-fit: cover; object-position: center; }
+.home-hero__veil { background: linear-gradient(180deg, #07100c66 0%, #07100c30 45%, #07100c99 100%); }
+.home-hero__content { position: relative; z-index: 1; display: flex; align-items: center; flex-direction: column; padding: 110px 24px 44px; text-align: center; }
+.home-hero h1 { margin: 0; color: #fff; font-size: clamp(4.75rem, 15vw, 12.5rem); font-weight: 500; line-height: .85; letter-spacing: -.065em; }
+.home-hero p { margin: clamp(24px, 4vh, 40px) 0 0; color: #fff; font-size: clamp(.74rem, 1.3vw, .95rem); font-weight: 500; letter-spacing: .32em; }
+.enter-link { display: flex; min-width: 72px; min-height: 72px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-top: clamp(54px, 9vh, 92px); color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .3em; text-decoration: none; text-transform: uppercase; }
+.enter-link__arrow { font-size: 1.25rem; font-weight: 400; transition: transform .25s ease; }
+.enter-link:hover .enter-link__arrow { transform: translateY(4px); }
+.home-editorial { width: min(100% - 48px, 1440px); margin-inline: auto; padding: clamp(96px, 12vw, 180px) 0; }
+.home-feature { margin-bottom: clamp(120px, 17vw, 250px); }
+.home-feature:last-child { margin-bottom: 0; }
+.home-feature__heading { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: clamp(24px, 4vw, 52px); border-top: 1px solid var(--ink); padding-top: 16px; }
+.home-feature h2 { font-size: clamp(3.4rem, 10vw, 9.5rem); font-weight: 500; line-height: .9; letter-spacing: -.065em; }
+.home-feature__number { color: var(--muted); font-size: .72rem; letter-spacing: .2em; }
+.home-feature__media { display: block; width: 88%; height: clamp(420px, 68vw, 880px); overflow: hidden; margin: 0; background: var(--background); }
+.home-feature--reverse .home-feature__media { margin-left: auto; }
+.home-feature__media img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .7s cubic-bezier(.2,.7,.2,1); }
+a.home-feature__media:hover img { transform: scale(1.012); }
+.home-feature__footer { display: flex; width: 88%; align-items: baseline; justify-content: space-between; gap: 32px; margin-top: 24px; }
+.home-feature--reverse .home-feature__footer { margin-left: auto; }
+.home-feature__footer p { margin: 0; color: var(--muted); font-size: clamp(.95rem, 1.5vw, 1.15rem); line-height: 1.5; }
+.explore-link { display: inline-flex; min-height: 44px; align-items: center; flex: 0 0 auto; gap: 12px; border-bottom: 1px solid currentColor; color: var(--ink); font-size: .76rem; font-weight: 600; letter-spacing: .18em; text-decoration: none; text-transform: uppercase; }
+.explore-link span { transition: transform .2s ease; }
+a.explore-link:hover span { transform: translateX(4px); }
+.explore-link--inactive { cursor: default; opacity: .45; }
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s ease, transform .8s ease; }
+.reveal.is-visible { opacity: 1; transform: translateY(0); }
+
+@media (max-width: 760px) {
+  .home-page .home-header { height: 70px; padding-inline: 12px; }
+  .home-page .home-header .nav-link { padding-inline: 11px; font-size: 14px; }
+  .home-hero__content { padding-top: 92px; }
+  .home-hero h1 { font-size: clamp(4.4rem, 25vw, 8rem); }
+  .home-hero p { letter-spacing: .22em; }
+  .home-editorial { width: min(100% - 32px, 1440px); padding-block: 88px; }
+  .home-feature { margin-bottom: 120px; }
+  .home-feature h2 { font-size: clamp(3.2rem, 18vw, 6rem); }
+  .home-feature__media,
+  .home-feature__footer { width: 100%; }
+  .home-feature__media { height: min(122vw, 620px); }
+  .home-feature__footer { align-items: flex-start; flex-direction: column; gap: 18px; margin-top: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; }
+}
+
 /* Künstlerübersicht und Künstlerseiten */
 .art-page { padding-bottom: 64px; }
 .art-intro { padding: 72px 0 45px; }
