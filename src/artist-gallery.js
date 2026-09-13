@@ -29,14 +29,26 @@ function galleryButton(className, label, content) {
   return button;
 }
 
+function imageIsAvailable(source) {
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => resolve(true);
+    image.onerror = () => resolve(false);
+    image.src = source;
+  });
+}
+
 async function initializeArtistGallery(gallery) {
   const status = gallery.querySelector(".artist-slideshow-status");
 
   try {
-    const response = await fetch(`/api/artworks.php?artist=${encodeURIComponent(gallery.dataset.artist)}`);
+    const response = await fetch(`/api/artworks.php?artist=${encodeURIComponent(gallery.dataset.artistId)}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
     if (!Array.isArray(data.images) || data.images.length === 0) throw new Error("Keine Werke");
+    const availability = await Promise.all(data.images.map(imageIsAvailable));
+    data.images = data.images.filter((source, index) => typeof source === "string" && availability[index]);
+    if (data.images.length === 0) throw new Error("Keine erreichbaren Werke");
 
     const stage = document.createElement("div");
     stage.className = "artist-gallery__stage";

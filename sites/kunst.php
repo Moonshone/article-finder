@@ -8,9 +8,9 @@ require_once __DIR__ . '/../app/artists.php';
 security_headers();
 
 $artists = [
-    ['id' => 2, 'name' => 'Laleh Barzegar', 'page' => 'laleh-barzegar.html', 'fallback' => '/bilder/artists/laleh/p1.jpg'],
-    ['id' => 3, 'name' => 'Hassan Keivan', 'page' => 'hassan-keivan.html', 'fallback' => '/bilder/artists/hassan/hassan1.png'],
-    ['id' => 4, 'name' => 'Shabrokh Golbaz', 'page' => 'shabrokh-golbaz.html', 'fallback' => '/bilder/artists/shabrokh/shabrokh.png'],
+    ['id' => 2, 'name' => 'Laleh Barzegar', 'page' => 'laleh-barzegar.html'],
+    ['id' => 3, 'name' => 'Hassan Keivan', 'page' => 'hassan-keivan.html'],
+    ['id' => 4, 'name' => 'Shabrokh Golbaz', 'page' => 'shabrokh-golbaz.html'],
 ];
 
 try {
@@ -49,10 +49,12 @@ try {
 
       <section class="artist-grid" aria-label="Künstlerübersicht">
 <?php foreach ($artists as $artist): ?>
-<?php $imageUrl = $databaseImages[$artist['id']] ?? $artist['fallback']; ?>
+<?php $imageUrl = $databaseImages[$artist['id']] ?? null; ?>
         <article class="artist-card">
           <a class="artist-image-link" href="<?= e($artist['page']) ?>" aria-label="Zur Künstlerseite von <?= e($artist['name']) ?>">
+<?php if ($imageUrl !== null): ?>
             <img src="<?= e($imageUrl) ?>" alt="<?= e($artist['name']) ?>">
+<?php endif; ?>
           </a>
           <p class="artist-name"><?= e($artist['name']) ?></p>
         </article>

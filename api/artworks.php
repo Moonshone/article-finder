@@ -8,25 +8,19 @@ require_once __DIR__ . '/../app/artworks.php';
 header('Content-Type: application/json; charset=utf-8');
 security_headers();
 
-$artists = [
-    'laleh' => 2,
-    'hassan' => 3,
-    'shabrokh' => 4,
-];
+$artistId = filter_input(INPUT_GET, 'artist', FILTER_VALIDATE_INT);
 
-$artist = isset($_GET['artist']) && is_string($_GET['artist']) ? $_GET['artist'] : '';
-
-if (!array_key_exists($artist, $artists)) {
+if ($artistId === false || $artistId === null || $artistId < 1) {
     http_response_code(400);
     echo json_encode(
-        ['error' => 'Ungültiger Künstler. Erlaubt sind: laleh, hassan, shabrokh.'],
+        ['error' => 'Ungültige Künstler-ID.'],
         JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
     );
     exit;
 }
 
 try {
-    $images = load_artwork_images($artists[$artist], $artist);
+    $images = load_artwork_images($artistId);
 } catch (Throwable $exception) {
     error_log('Artwork gallery database query failed: ' . $exception->getMessage());
     http_response_code(503);
@@ -38,6 +32,6 @@ try {
 }
 
 echo json_encode(
-    ['artist' => $artist, 'images' => $images],
+    ['artist' => $artistId, 'images' => $images],
     JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
 );

@@ -1262,6 +1262,48 @@ loadArtistDescription();
 
 
 // ======================================================
+// Künstlerbilder aus der Datenbank
+// ======================================================
+
+async function loadArtistImage(element) {
+  const artistId = element.dataset.artistImageId;
+  if (!artistId) return;
+
+  try {
+    const response = await fetch(
+      `/api/artist-infos.php?id=${encodeURIComponent(artistId)}`,
+      { cache: "no-store" }
+    );
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const data = await response.json();
+    if (typeof data.image_url !== "string" || !data.image_url) return;
+
+    const image = document.createElement("img");
+    image.src = data.image_url;
+    image.alt = element.dataset.artistImageAlt || "";
+    image.decoding = "async";
+    image.addEventListener("error", () => image.remove(), { once: true });
+
+    if (element.dataset.artistImageClass) {
+      image.className = element.dataset.artistImageClass;
+    }
+    if (element.dataset.artistImagePriority === "high") {
+      image.fetchPriority = "high";
+    } else {
+      image.loading = "lazy";
+    }
+
+    element.prepend(image);
+  } catch (error) {
+    // Missing or unavailable images intentionally leave the image area empty.
+  }
+}
+
+document.querySelectorAll("[data-artist-image-id]").forEach(loadArtistImage);
+
+
+// ======================================================
 // Dezente Einblendungen auf der Startseite
 // ======================================================
 

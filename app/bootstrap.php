@@ -33,7 +33,7 @@ function e(?string $value): string
 
 function security_headers(bool $admin = false): void
 {
-    header("Content-Security-Policy: default-src 'self'; img-src 'self' data:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests");
+    header("Content-Security-Policy: default-src 'self'; img-src 'self' https:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests");
     header('X-Content-Type-Options: nosniff');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
@@ -126,4 +126,3 @@ function audit(string $event, ?int $userId = null, array $context = []): void
         error_log('Audit logging failed: ' . $exception->getMessage());
     }
 }
-
