@@ -2,49 +2,17 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/images.php';
+
 /**
  * Return a browser-safe, existing local artist image URL or null.
  *
- * Artist images are intentionally limited to the two image directories used by
- * the site. Remote URLs and browser-interpreted schemes are not supported.
+ * The database is the only source; validation and local file checks are
+ * delegated to the shared image URL policy.
  */
 function artist_image_url(?string $value, ?callable $fileExists = null): ?string
 {
-    $path = trim($value ?? '');
-    if ($path === '' || str_contains($path, "\0") || str_contains($path, '\\') || str_starts_with($path, '//')) {
-        return null;
-    }
-
-    $path = ltrim($path, '/');
-    if (str_contains($path, '?') || str_contains($path, '#')) {
-        return null;
-    }
-
-    $decodedPath = rawurldecode($path);
-    if ($decodedPath !== $path && str_contains($decodedPath, '%')) {
-        $decodedPath = rawurldecode($decodedPath);
-    }
-
-    if (!preg_match('~\A(?:bilder/artists|assets/images/artists)/~', $decodedPath)) {
-        return null;
-    }
-
-    foreach (explode('/', $decodedPath) as $segment) {
-        if ($segment === '' || $segment === '.' || $segment === '..') {
-            return null;
-        }
-    }
-
-    if (!preg_match('~\.(?:avif|gif|jpe?g|png|webp)\z~i', $decodedPath)) {
-        return null;
-    }
-
-    $fileExists ??= static fn (string $file): bool => is_file(NEMA_ROOT . '/' . $file);
-    if (!$fileExists($decodedPath)) {
-        return null;
-    }
-
-    return '/' . $path;
+    return database_image_url($value, $fileExists);
 }
 
 /** @param list<int> $artistIds

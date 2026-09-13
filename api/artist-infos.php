@@ -2,8 +2,12 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../app/bootstrap.php';
+require_once __DIR__ . '/../app/artists.php';
+
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
+security_headers();
 
 $artistId = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
@@ -20,12 +24,8 @@ if ($artistId === false || $artistId === null || $artistId < 1) {
 
 try {
 
-    // Datenbankverbindung laden
-    require_once __DIR__ . '/../../config.php';
-
-    // Nur description auslesen
-    $statement = $pdo->prepare(
-        'SELECT description
+    $statement = database()->prepare(
+        'SELECT description, img_url
          FROM artists
          WHERE id = :id
          LIMIT 1'
@@ -35,9 +35,9 @@ try {
         'id' => $artistId
     ]);
 
-    $description = $statement->fetchColumn();
+    $artist = $statement->fetch();
 
-    if ($description === false) {
+    if ($artist === false) {
         http_response_code(404);
 
         echo json_encode(
@@ -50,7 +50,10 @@ try {
 
     echo json_encode(
         [
-            'description' => (string) $description
+            'description' => (string) ($artist['description'] ?? ''),
+            'image_url' => artist_image_url(
+                isset($artist['img_url']) && is_string($artist['img_url']) ? $artist['img_url'] : null
+            ),
         ],
         JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
     );
