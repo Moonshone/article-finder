@@ -99,6 +99,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .home-page .home-header { position: absolute; z-index: 5; top: 0; left: 0; width: 100%; background: transparent; transform: none; }
 .home-page .home-header .nav-link { text-shadow: 0 1px 16px #0008; }
 .home-hero { position: relative; display: grid; width: 100%; min-height: 100vh; min-height: 100svh; overflow: hidden; place-items: center; color: #fff; background: var(--ink); }
+.home-hero::before { position: absolute; inset: 0; background: url("/bilder/webseite/Hintergrund.png") center / cover no-repeat; content: ""; opacity: .4; }
 .home-hero__image,
 .home-hero__veil { position: absolute; inset: 0; width: 100%; height: 100%; }
 .home-hero__image { object-fit: cover; object-position: center; }
