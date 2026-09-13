@@ -1,0 +1,10 @@
+Options -Indexes
+RewriteEngine On
+RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=308,L]
+
+<FilesMatch "^(?:\.env|composer\.(?:json|lock)|.*\.(?:sql|log|ini))$">
+    Require all denied
+</FilesMatch>
+
