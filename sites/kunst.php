@@ -1,3 +1,25 @@
+<?php
+
+declare(strict_types=1);
+
+require_once __DIR__ . '/../app/bootstrap.php';
+require_once __DIR__ . '/../app/artists.php';
+
+security_headers();
+
+$artists = [
+    ['id' => 2, 'name' => 'Laleh Barzegar', 'page' => 'laleh-barzegar.html', 'fallback' => '/bilder/artists/laleh/p1.jpg'],
+    ['id' => 3, 'name' => 'Hassan Keivan', 'page' => 'hassan-keivan.html', 'fallback' => '/bilder/artists/hassan/hassan1.png'],
+    ['id' => 4, 'name' => 'Shabrokh Golbaz', 'page' => 'shabrokh-golbaz.html', 'fallback' => '/bilder/artists/shabrokh/shabrokh.png'],
+];
+
+try {
+    $databaseImages = load_artist_images(array_column($artists, 'id'));
+} catch (Throwable $exception) {
+    error_log('Artist overview database query failed: ' . $exception->getMessage());
+    $databaseImages = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -26,27 +48,16 @@
       </section>
 
       <section class="artist-grid" aria-label="Künstlerübersicht">
+<?php foreach ($artists as $artist): ?>
+<?php $imageUrl = $databaseImages[$artist['id']] ?? $artist['fallback']; ?>
         <article class="artist-card">
-          <a class="artist-image-link" href="laleh-barzegar.html" aria-label="Zur Künstlerseite von Laleh Barzegar">
-            <img src="../bilder/artists/laleh/p1.jpg" alt="Laleh Barzegar">
+          <a class="artist-image-link" href="<?= e($artist['page']) ?>" aria-label="Zur Künstlerseite von <?= e($artist['name']) ?>">
+            <img src="<?= e($imageUrl) ?>" alt="<?= e($artist['name']) ?>">
           </a>
-          <p class="artist-name">Laleh Barzegar</p>
+          <p class="artist-name"><?= e($artist['name']) ?></p>
         </article>
 
-        <article class="artist-card">
-          <a class="artist-image-link" href="hassan-keivan.html" aria-label="Zur Künstlerseite von Hassan Keivan">
-            <img src="../bilder/artists/hassan/hassan1.png" alt="Hassan Keivan">
-          </a>
-          <p class="artist-name">Hassan Keivan</p>
-        </article>
-
-        <article class="artist-card">
-          <a class="artist-image-link" href="shabrokh-golbaz.html" aria-label="Zur Künstlerseite von Shabrokh Golbaz">
-            <img src="../bilder/artists/shabrokh/shabrokh.png" alt="Shabrokh Golbaz">
-          </a>
-          <p class="artist-name">Shabrokh Golbaz</p>
-        </article>
-
+<?php endforeach; ?>
         <article class="artist-card artist-card-placeholder">
           <span>Künstlerkarte</span>
         </article>
