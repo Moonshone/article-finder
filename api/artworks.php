@@ -2,12 +2,16 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/../app/bootstrap.php';
+require_once __DIR__ . '/../app/artworks.php';
+
 header('Content-Type: application/json; charset=utf-8');
+security_headers();
 
 $artists = [
-    'laleh' => 'laleh',
-    'hassan' => 'hassan',
-    'shabrokh' => 'shabrokh',
+    'laleh' => 2,
+    'hassan' => 3,
+    'shabrokh' => 4,
 ];
 
 $artist = isset($_GET['artist']) && is_string($_GET['artist']) ? $_GET['artist'] : '';
@@ -21,29 +25,17 @@ if (!array_key_exists($artist, $artists)) {
     exit;
 }
 
-$directory = __DIR__ . '/../bilder/artworks/' . $artists[$artist];
-$images = [];
-
-if (is_dir($directory) && is_readable($directory)) {
-    $files = scandir($directory);
-
-    if ($files !== false) {
-        foreach ($files as $file) {
-            $path = $directory . DIRECTORY_SEPARATOR . $file;
-            $extension = strtolower((string) pathinfo($file, PATHINFO_EXTENSION));
-
-            if (is_file($path) && in_array($extension, ['jpg', 'jpeg', 'png', 'webp'], true)) {
-                $images[] = $file;
-            }
-        }
-    }
+try {
+    $images = load_artwork_images($artists[$artist], $artist);
+} catch (Throwable $exception) {
+    error_log('Artwork gallery database query failed: ' . $exception->getMessage());
+    http_response_code(503);
+    echo json_encode(
+        ['error' => 'Derzeit sind keine Werke verfügbar.'],
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    );
+    exit;
 }
-
-natcasesort($images);
-$images = array_values(array_map(
-    static fn (string $file): string => '/bilder/artworks/' . $artists[$artist] . '/' . rawurlencode($file),
-    $images
-));
 
 echo json_encode(
     ['artist' => $artist, 'images' => $images],
