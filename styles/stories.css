@@ -1,0 +1,20 @@
+.stories-shell { width: min(100% - 40px, 1280px); }
+.stories-intro { padding: clamp(64px, 10vw, 130px) 0; border-bottom: 1px solid var(--ink); }
+.stories-intro h1 { margin: 12px 0; font-size: clamp(4rem, 12vw, 10rem); font-weight: 500; line-height: .85; }
+.stories-intro > p:last-child { color: var(--muted); font-size: 18px; }
+.story-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(36px, 6vw, 80px) clamp(24px, 5vw, 64px); padding: clamp(54px, 8vw, 100px) 0; }
+.story-card img { display: block; width: 100%; aspect-ratio: 4 / 3; margin-bottom: 22px; background: var(--background); object-fit: cover; }
+.story-card time, .story-detail time { color: var(--muted); font-size: 12px; letter-spacing: .1em; }
+.story-card h2 { margin: 10px 0; font-size: clamp(1.7rem, 3vw, 2.7rem); }
+.story-card h2 a, .story-read, .story-back, .story-detail > a { color: var(--ink); text-decoration: none; }
+.story-card p { color: var(--muted); line-height: 1.65; }
+.story-read { display: inline-block; border-bottom: 1px solid; padding-bottom: 4px; font-weight: 600; }
+.stories-empty { grid-column: 1 / -1; color: var(--muted); }
+.story-detail { max-width: 850px; margin: auto; padding: clamp(54px, 9vw, 110px) 0; }
+.story-detail .story-back { display: block; margin-bottom: 52px; }
+.story-detail h1 { margin: 14px 0 40px; font-size: clamp(2.8rem, 7vw, 6rem); }
+.story-hero { display: block; width: 100%; max-height: 700px; margin-bottom: 48px; object-fit: cover; }
+.story-content { font-size: clamp(1.05rem, 2vw, 1.2rem); line-height: 1.8; }
+.story-content a { color: var(--green); }
+@media (max-width: 680px) { .stories-shell { width: min(100% - 24px, 1280px); } .story-grid { grid-template-columns: 1fr; } .stories-intro h1 { font-size: clamp(3.5rem, 20vw, 7rem); } }
+
