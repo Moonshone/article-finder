@@ -38,6 +38,18 @@ function database_image_url(?string $value, ?callable $fileExists = null): ?stri
     }
 
     $path = ltrim($url, '/');
+
+    // The repository root is the public document root. Some legacy database
+    // values include that deployment directory as a URL segment; it is not
+    // part of the browser-visible path.
+    if ($path === 'www' || str_starts_with($path, 'www/')) {
+        $path = substr($path, 3);
+        $path = ltrim($path, '/');
+    }
+
+    if ($path === '') {
+        return null;
+    }
     $decodedPath = $path;
     for ($iteration = 0; $iteration < 3; $iteration++) {
         $decoded = rawurldecode($decodedPath);

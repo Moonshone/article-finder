@@ -1,1 +1,88 @@
+#!/usr/bin/env php
+<?php
 
+declare(strict_types=1);
+
+require_once __DIR__ . '/app/bootstrap.php';
+require_once __DIR__ . '/app/artworks.php';
+
+function check(bool $condition, string $message): void
+{
+    if (!$condition) {
+        fwrite(STDERR, "FAIL: {$message}\n");
+        exit(1);
+    }
+}
+
+$pdo = new PDO('sqlite::memory:');
+$pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+$pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+$pdo->exec('CREATE TABLE art_works (
+    id INTEGER PRIMARY KEY,
+    artist_id INTEGER NULL,
+    Name TEXT NULL,
+    Year TEXT NULL,
+    location TEXT NULL,
+    url TEXT NULL
+)');
+
+$insert = $pdo->prepare(
+    'INSERT INTO art_works (id, artist_id, Name, Year, location, url)
+     VALUES (:id, :artist_id, :name, :year, :location, :url)'
+);
+$rows = [
+    [1, 1, 'Ein Werk', '2024', 'Berlin', '/www/bilder/artworks/one.png'],
+    [2, 2, 'Erstes', '2020', 'Köln', '/bilder/artworks/two.jpg'],
+    [3, 2, '<script>alert(1)</script>', '2021', '" onclick="alert(1)', 'https://images.example/three.webp'],
+    [4, 2, null, null, null, null],
+    [5, 2, 'Leer', '', '', ''],
+    [6, 2, 'Traversal', '', '', '/../secret.png'],
+    [7, 2, 'Fehlt', '', '', '/bilder/artworks/missing.png'],
+    [8, 3, 'Anderer Artist', '', '', '/bilder/artworks/other.png'],
+    [9, null, 'Ohne Zuordnung', '', '', '/bilder/artworks/orphan.png'],
+];
+foreach ($rows as [$id, $artistId, $name, $year, $location, $url]) {
+    $insert->execute([
+        'id' => $id,
+        'artist_id' => $artistId,
+        'name' => $name,
+        'year' => $year,
+        'location' => $location,
+        'url' => $url,
+    ]);
+}
+
+$existing = static fn (string $path): bool => $path !== 'bilder/artworks/missing.png';
+$one = load_artworks(1, $pdo, $existing);
+check(count($one) === 1, 'artist with one artwork');
+check($one[0]['url'] === '/bilder/artworks/one.png', '/www prefix normalization');
+
+$many = load_artworks(2, $pdo, $existing);
+check(count($many) === 6, 'all artist records are returned without a limit');
+check(array_column($many, 'id') === [2, 3, 4, 5, 6, 7], 'records are ordered and isolated by artist_id');
+check($many[2]['name'] === '' && $many[2]['url'] === null, 'NULL fields are handled');
+check($many[3]['url'] === null, 'empty URLs are handled');
+check($many[4]['url'] === null, 'traversal is rejected');
+check($many[5]['url'] === null, 'missing local files are omitted safely');
+check($many[1]['name'] === '<script>alert(1)</script>', 'text remains data for JSON/textContent rendering');
+check(load_artworks(10, $pdo, $existing) === [], 'artist without artworks');
+check(array_column(load_artworks(3, $pdo, $existing), 'id') === [8], 'second artist remains isolated');
+check(load_artwork_images(2, $pdo, $existing) === ['/bilder/artworks/two.jpg', 'https://images.example/three.webp'], 'only safe artwork URLs reach the gallery');
+
+foreach (['javascript:alert(1)', 'data:image/png;base64,AA', 'vbscript:x', 'file:///tmp/a.png', '//evil.test/a.png'] as $url) {
+    check(artwork_image_url($url, $existing) === null, "unsafe URL rejected: {$url}");
+}
+check(artwork_image_url('http://example.test/a.png', $existing) === null, 'plain HTTP is rejected');
+check(artwork_image_url('https://example.test/a.png', $existing) === 'https://example.test/a.png', 'HTTPS is accepted');
+
+foreach ([0, -1] as $invalidId) {
+    try {
+        load_artworks($invalidId, $pdo, $existing);
+        check(false, 'invalid artist ID must throw');
+    } catch (InvalidArgumentException) {
+        // Expected.
+    }
+}
+check(filter_var('2 OR 1=1', FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]) === false, 'SQL injection payload is not an integer');
+
+echo "All artwork tests passed.\n";

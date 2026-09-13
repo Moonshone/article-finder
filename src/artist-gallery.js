@@ -42,13 +42,14 @@ async function initializeArtistGallery(gallery) {
   const status = gallery.querySelector(".artist-slideshow-status");
 
   try {
-    const response = await fetch(`/api/artworks.php?artist=${encodeURIComponent(gallery.dataset.artistId)}`);
+    const response = await fetch(`/api/artworks.php?artist_id=${encodeURIComponent(gallery.dataset.artistId)}`);
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     const data = await response.json();
-    if (!Array.isArray(data.images) || data.images.length === 0) throw new Error("Keine Werke");
-    const availability = await Promise.all(data.images.map(imageIsAvailable));
-    data.images = data.images.filter((source, index) => typeof source === "string" && availability[index]);
-    if (data.images.length === 0) throw new Error("Keine erreichbaren Werke");
+    if (!Array.isArray(data.artworks) || data.artworks.length === 0) throw new Error("Keine Werke");
+    const displayableArtworks = data.artworks.filter((artwork) => artwork && typeof artwork.url === "string");
+    const availability = await Promise.all(displayableArtworks.map((artwork) => imageIsAvailable(artwork.url)));
+    const artworks = displayableArtworks.filter((artwork, index) => availability[index]);
+    if (artworks.length === 0) throw new Error("Keine erreichbaren Werke");
 
     const stage = document.createElement("div");
     stage.className = "artist-gallery__stage";
@@ -86,15 +87,15 @@ async function initializeArtistGallery(gallery) {
     caption.hidden = true;
     gallery.replaceChildren(stage, toolbar, filmstrip, caption);
     gallery.tabIndex = 0;
-    gallery.dataset.artworkCount = `${data.images.length}`;
+    gallery.dataset.artworkCount = `${artworks.length}`;
 
     let currentIndex = 0;
     let changeSequence = 0;
     let slideshowTimer = null;
-    const thumbnails = data.images.map((source, index) => {
-      const thumbnail = galleryButton("artist-gallery__thumbnail", `Kunstwerk ${index + 1} von ${data.images.length} anzeigen`, "");
+    const thumbnails = artworks.map((artwork, index) => {
+      const thumbnail = galleryButton("artist-gallery__thumbnail", `Kunstwerk ${index + 1} von ${artworks.length} anzeigen`, "");
       const image = document.createElement("img");
-      image.src = source;
+      image.src = artwork.url;
       image.alt = "";
       image.loading = index === 0 ? "eager" : "lazy";
       image.decoding = "async";
@@ -105,10 +106,16 @@ async function initializeArtistGallery(gallery) {
     });
 
     function updateSelection(index, shouldFocusThumbnail = false) {
-      currentIndex = (index + data.images.length) % data.images.length;
+      currentIndex = (index + artworks.length) % artworks.length;
       gallery.dataset.currentArtwork = `${currentIndex + 1}`;
-      mainImage.src = data.images[currentIndex];
-      mainImage.alt = `Kunstwerk ${currentIndex + 1} von ${data.images.length}`;
+      const artwork = artworks[currentIndex];
+      mainImage.src = artwork.url;
+      mainImage.alt = artwork.name || `Kunstwerk ${currentIndex + 1} von ${artworks.length}`;
+      const details = [artwork.name, artwork.year, artwork.location].filter(
+        (value) => typeof value === "string" && value.trim() !== ""
+      );
+      caption.textContent = details.join(" · ");
+      caption.hidden = details.length === 0;
       thumbnails.forEach((thumbnail, thumbnailIndex) => {
         const active = thumbnailIndex === currentIndex;
         thumbnail.classList.toggle("artist-gallery__thumbnail--active", active);
@@ -126,14 +133,14 @@ async function initializeArtistGallery(gallery) {
 
     function startSlideshow() {
       stopSlideshow();
-      if (data.images.length < 2) return;
+      if (artworks.length < 2) return;
       slideshowTimer = setTimeout(() => selectArtwork(currentIndex + 1), GALLERY_SLIDE_DURATION);
     }
 
     async function selectArtwork(index) {
       stopSlideshow();
-      if (data.images.length === 0) return;
-      if ((index + data.images.length) % data.images.length === currentIndex) {
+      if (artworks.length === 0) return;
+      if ((index + artworks.length) % artworks.length === currentIndex) {
         startSlideshow();
         return;
       }
@@ -189,7 +196,7 @@ async function initializeArtistGallery(gallery) {
     }
     new ResizeObserver(updateStripNavigation).observe(viewport);
     window.addEventListener("load", updateStripNavigation, { once: true });
-    const onlyOne = data.images.length === 1;
+    const onlyOne = artworks.length === 1;
     previous.disabled = onlyOne;
     next.disabled = onlyOne;
     updateSelection(0);
