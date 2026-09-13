@@ -13,31 +13,58 @@ function artwork_image_url(?string $value, ?callable $fileExists = null): ?strin
 }
 
 /**
- * @return list<string>
+ * Load every artwork belonging to an artist through the foreign key only.
+ *
+ * @return list<array{id: int, artist_id: int, name: string, year: string, location: string, url: string|null}>
  */
-function load_artwork_images(int $artistId, ?PDO $connection = null, ?callable $fileExists = null): array
+function load_artworks(int $artistId, ?PDO $connection = null, ?callable $fileExists = null): array
 {
+    if ($artistId < 1) {
+        throw new InvalidArgumentException('Artist ID must be a positive integer.');
+    }
+
     $connection ??= database();
     $statement = $connection->prepare(
-        'SELECT id, artist, url FROM art_works WHERE artist = :artist ORDER BY id ASC'
+        'SELECT id, artist_id, Name, Year, location, url
+         FROM art_works
+         WHERE artist_id = :artist_id
+         ORDER BY id ASC'
     );
-    $statement->bindValue(':artist', $artistId, PDO::PARAM_INT);
+    $statement->bindValue(':artist_id', $artistId, PDO::PARAM_INT);
     $statement->execute();
 
-    $images = [];
+    $artworks = [];
     foreach ($statement->fetchAll() as $artwork) {
-        $rowArtistId = filter_var($artwork['artist'] ?? null, FILTER_VALIDATE_INT);
-        if ($rowArtistId === false || $rowArtistId !== $artistId) {
+        $id = filter_var($artwork['id'] ?? null, FILTER_VALIDATE_INT);
+        $rowArtistId = filter_var($artwork['artist_id'] ?? null, FILTER_VALIDATE_INT);
+        if ($id === false || $rowArtistId === false || $rowArtistId !== $artistId) {
             continue;
         }
 
         $url = isset($artwork['url']) && is_string($artwork['url'])
             ? artwork_image_url($artwork['url'], $fileExists)
             : null;
-        if ($url !== null) {
-            $images[] = $url;
-        }
+        $artworks[] = [
+            'id' => $id,
+            'artist_id' => $rowArtistId,
+            'name' => (string) ($artwork['Name'] ?? ''),
+            'year' => (string) ($artwork['Year'] ?? ''),
+            'location' => (string) ($artwork['location'] ?? ''),
+            'url' => $url,
+        ];
     }
 
-    return $images;
+    return $artworks;
+}
+
+/** @return list<string> */
+function load_artwork_images(int $artistId, ?PDO $connection = null, ?callable $fileExists = null): array
+{
+    return array_values(array_map(
+        static fn (array $artwork): string => $artwork['url'],
+        array_filter(
+            load_artworks($artistId, $connection, $fileExists),
+            static fn (array $artwork): bool => $artwork['url'] !== null
+        )
+    ));
 }
