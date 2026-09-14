@@ -13,35 +13,26 @@ try {
     $raw = file_get_contents('php://input', false, null, 0, 16385);
     if (!is_string($raw) || strlen($raw) > 16384) throw new InvalidArgumentException('body');
     $input = json_decode($raw, true, 16, JSON_THROW_ON_ERROR);
-    $allowedKeys = ['suchmodus', 'job', 'berufsbereiche', 'ort', 'radius', 'remote', 'beschaeftigungsart', 'webseiten', 'ausschluesse'];
+    $allowedKeys = ['jobs', 'ort', 'radius', 'remote', 'beschaeftigungsart', 'webseiten', 'ausschluesse'];
     if (!is_array($input) || array_diff(array_keys($input), $allowedKeys)) throw new InvalidArgumentException('keys');
 
-    $mode = $input['suchmodus'] ?? null;
-    $job = job_finder_text($input['job'] ?? null, 120) ?? throw new InvalidArgumentException('job');
-    $areas = job_finder_occupations($input['berufsbereiche'] ?? null);
+    $jobs = job_finder_occupations($input['jobs'] ?? null);
     $ort = job_finder_text($input['ort'] ?? null, 100, true);
     $radius = $input['radius'] ?? null;
     $remote = $input['remote'] ?? null;
     $employment = $input['beschaeftigungsart'] ?? null;
     $sources = job_finder_string_array($input['webseiten'] ?? null, 5, 80);
     $exclusions = job_finder_string_array($input['ausschluesse'] ?? null, 20, 80);
-    if (!in_array($mode, ['mehrere_berufsbereiche', 'bestimmter_job'], true) || $areas === null || $ort === null
+    if ($jobs === null || $jobs === [] || $ort === null
         || !in_array($radius, [10, 25, 50, 100, 'egal', ''], true)
         || !in_array($remote, ['egal', 'remote', 'hybrid', 'vor_ort'], true)
         || !in_array($employment, ['egal', 'Vollzeit', 'Teilzeit', 'Freelancer'], true)
         || $sources === null || $exclusions === null) throw new InvalidArgumentException('fields');
-    if ($mode === 'mehrere_berufsbereiche') {
-        if ($areas === []) throw new InvalidArgumentException('mode');
-        $job = '';
-    } elseif ($mode === 'bestimmter_job') {
-        if ($job === '') throw new InvalidArgumentException('mode');
-        $areas = [];
-    }
     $allowedSources = ['unternehmensseiten', 'stepstone.de', 'arbeitsagentur.de', 'indeed.com', 'linkedin.com'];
     if (array_diff($sources, $allowedSources)) throw new InvalidArgumentException('sources');
 
-    $payload = compact('job', 'ort', 'radius', 'remote');
-    $payload += ['profile_id' => $_SESSION['job_finder_profile_id'], 'suchmodus' => $mode, 'berufsbereiche' => $areas,
+    $payload = ['profile_id' => $_SESSION['job_finder_profile_id'], 'suchmodus' => 'mehrere_berufsbereiche',
+        'job' => '', 'berufsbereiche' => $jobs, 'ort' => $ort, 'radius' => $radius, 'remote' => $remote,
         'beschaeftigungsart' => $employment, 'webseiten' => $sources, 'ausschluesse' => $exclusions];
     $response = job_finder_call($config['search_url'], $config['secret'], [
         CURLOPT_POST => true,
