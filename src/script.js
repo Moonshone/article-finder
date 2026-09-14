@@ -1304,6 +1304,57 @@ document.querySelectorAll("[data-artist-image-id]").forEach(loadArtistImage);
 
 
 // ======================================================
+// Dekorativer Hintergrund auf der Startseite
+// ======================================================
+
+function createHomeHeroBackground() {
+  const hero = document.querySelector(".home-page .home-hero");
+  const background = hero?.querySelector(".home-hero__background");
+
+  if (!hero || !background) return;
+
+  const imagePath = "/bilder/webseite/Hintergrund.png";
+  const probe = new Image();
+
+  probe.addEventListener("load", () => {
+    const heroArea = hero.clientWidth * hero.clientHeight;
+    const imageArea = probe.naturalWidth * probe.naturalHeight;
+    const density = window.matchMedia("(max-width: 760px)").matches ? 2.4 : 1.8;
+    const minimum = window.matchMedia("(max-width: 760px)").matches ? 2 : 4;
+    const maximum = window.matchMedia("(max-width: 760px)").matches ? 5 : 12;
+    const imageCount = Math.max(
+      minimum,
+      Math.min(maximum, Math.round(heroArea / (imageArea * density)))
+    );
+
+    const fragment = document.createDocumentFragment();
+
+    for (let index = 0; index < imageCount; index += 1) {
+      const image = document.createElement("img");
+      const minimumX = -probe.naturalWidth * .25;
+      const minimumY = -probe.naturalHeight * .25;
+      const availableX = Math.max(0, hero.clientWidth - probe.naturalWidth * .5);
+      const availableY = Math.max(0, hero.clientHeight - probe.naturalHeight * .5);
+
+      image.src = imagePath;
+      image.alt = "";
+      image.decoding = "async";
+      image.draggable = false;
+      image.style.left = `${minimumX + Math.random() * availableX}px`;
+      image.style.top = `${minimumY + Math.random() * availableY}px`;
+      fragment.append(image);
+    }
+
+    background.append(fragment);
+  }, { once: true });
+
+  probe.src = imagePath;
+}
+
+createHomeHeroBackground();
+
+
+// ======================================================
 // Dezente Einblendungen auf der Startseite
 // ======================================================
 
