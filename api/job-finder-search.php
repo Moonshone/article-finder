@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../app/job-finder.php';
+$config = job_finder_require_config(['search_url', 'secret']);
 
 try {
     job_finder_require_request('application/json');
@@ -38,11 +39,11 @@ try {
     $payload = compact('job', 'ort', 'radius', 'remote');
     $payload += ['profile_id' => $_SESSION['job_finder_profile_id'], 'suchmodus' => $mode, 'berufsbereiche' => $areas,
         'beschaeftigungsart' => $employment, 'webseiten' => $sources, 'ausschluesse' => $exclusions];
-    $response = job_finder_call('N8N_JOB_FINDER_SEARCH_URL', [
+    $response = job_finder_call($config['search_url'], $config['secret'], [
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($payload, JSON_THROW_ON_ERROR),
         CURLOPT_HTTPHEADER => ['Accept: application/json', 'Content-Type: application/json',
-            'X-Job-Finder-Secret: ' . job_finder_config('N8N_JOB_FINDER_SECRET')],
+            'X-Job-Finder-Secret: ' . $config['secret']],
     ], 180);
     $jobs = $response['ergebnisse'] ?? null;
     $searched = $response['gesuchte_berufe'] ?? [];
