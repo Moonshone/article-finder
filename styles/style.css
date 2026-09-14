@@ -97,15 +97,15 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 /* Startseite: Enter NEMA */
 .home-page { overflow-x: hidden; background: var(--paper); }
 .home-page .home-header { position: absolute; z-index: 5; top: 0; left: 0; width: 100%; background: transparent; transform: none; }
-.home-page .home-header .nav-link { text-shadow: 0 1px 16px #0008; }
-.home-hero { position: relative; display: grid; width: 100%; min-height: 100vh; min-height: 100svh; overflow: hidden; place-items: center; color: #fff; background: var(--paper); }
+.home-page .home-header .nav-link { color: #333333; text-shadow: 0 1px 16px #0008; }
+.home-page .home-header .nav-link:hover, .home-page .home-header .nav-link:focus-visible, .home-page .home-header .nav-link.active { color: #333333; }
+.home-hero { position: relative; display: grid; width: 100%; min-height: 100vh; min-height: 100svh; overflow: hidden; place-items: center; color: #333333; background: var(--paper); }
 .home-hero::before { position: absolute; inset: 0; background: url("/bilder/webseite/Hintergrund.png") center / cover no-repeat; content: ""; opacity: .4; }
 .home-hero__image { position: absolute; inset: 0; width: 100%; height: 100%; }
 .home-hero__image { object-fit: cover; object-position: center; }
 .home-hero__content { position: relative; z-index: 1; display: flex; align-items: center; flex-direction: column; padding: 110px 24px 44px; text-align: center; }
-.home-hero h1 { margin: 0; color: #fff; font-size: clamp(4.75rem, 15vw, 12.5rem); font-weight: 500; line-height: .85; letter-spacing: -.065em; }
-.home-hero p { margin: clamp(24px, 4vh, 40px) 0 0; color: #fff; font-size: clamp(.74rem, 1.3vw, .95rem); font-weight: 500; letter-spacing: .32em; }
-.enter-link { display: flex; min-width: 72px; min-height: 72px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-top: clamp(54px, 9vh, 92px); color: #fff; font-size: .72rem; font-weight: 600; letter-spacing: .3em; text-decoration: none; text-transform: uppercase; }
+.home-hero p { margin: clamp(24px, 4vh, 40px) 0 0; color: #333333; font-size: clamp(.74rem, 1.3vw, .95rem); font-weight: 500; letter-spacing: .32em; }
+.enter-link { display: flex; min-width: 72px; min-height: 72px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-top: clamp(54px, 9vh, 92px); color: #333333; font-size: .72rem; font-weight: 600; letter-spacing: .3em; text-decoration: none; text-transform: uppercase; }
 .enter-link__arrow { font-size: 1.25rem; font-weight: 400; transition: transform .25s ease; }
 .enter-link:hover .enter-link__arrow { transform: translateY(4px); }
 .home-editorial { width: min(100% - 48px, 1440px); margin-inline: auto; padding: clamp(96px, 12vw, 180px) 0; }
@@ -131,7 +131,6 @@ a.explore-link:hover span { transform: translateX(4px); }
 @media (max-width: 760px) {
   .home-page .home-header { height: 70px; }
   .home-hero__content { padding-top: 92px; }
-  .home-hero h1 { font-size: clamp(4.4rem, 25vw, 8rem); }
   .home-hero p { letter-spacing: .22em; }
   .home-editorial { width: min(100% - 32px, 1440px); padding-block: 88px; }
   .home-feature { margin-bottom: 120px; }
