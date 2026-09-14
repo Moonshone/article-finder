@@ -13,15 +13,15 @@ Der Admin ist unter `/admin/`, die öffentliche Übersicht unter `/stories/` err
 
 ## Job-Finder mit n8n verbinden
 
-Der Browser kommuniziert ausschließlich mit den PHP-Proxys unter `/api/`. Lege auf dem Server **außerhalb des Repository-/Webroot-Verzeichnisses** die Datei `../job-finder.local.php` an (bei diesem Deployment also neben dem Verzeichnis `article-finder`):
+Der Browser kommuniziert ausschließlich mit den PHP-Proxys unter `/api/`. Lege auf dem Server **außerhalb des Repository-/Webroot-Verzeichnisses** die Datei `../config/job-finder.local.php` an (bei diesem Deployment also im Verzeichnis `config` neben dem Webroot `article-finder`):
 
 ```php
 <?php
 return [
-    'N8N_JOB_FINDER_UPLOAD_URL' => 'https://appwbs.app.n8n.cloud/webhook/job-finder/cv-upload',
-    'N8N_JOB_FINDER_SEARCH_URL' => 'https://appwbs.app.n8n.cloud/webhook/job-finder/search',
-    'N8N_JOB_FINDER_SECRET' => 'HIER_DAS_NEUE_GEHEIME_SECRET_EINTRAGEN',
+    'upload_url' => 'HIER_DIE_PRODUCTION_UPLOAD_URL_EINTRAGEN',
+    'search_url' => 'HIER_DIE_PRODUCTION_SEARCH_URL_EINTRAGEN',
+    'secret' => 'HIER_DAS_NEUE_GEHEIME_SECRET_EINTRAGEN',
 ];
 ```
 
-Alternativ können dieselben drei Namen als Server-Umgebungsvariablen gesetzt werden; sie haben Vorrang. Die lokale Datei und insbesondere ihr Secret dürfen nicht committed, ausgeliefert oder unter dem Webroot abgelegt werden. PHP benötigt cURL, Fileinfo, JSON und mbstring.
+Die lokale Datei und insbesondere ihr Secret dürfen nicht committed, ausgeliefert oder unter dem Webroot abgelegt werden. PHP benötigt cURL, Fileinfo, JSON und mbstring.

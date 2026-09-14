@@ -77,34 +77,49 @@ function job_finder_rate_limit(string $action, int $limit, int $window): void
     flock($handle, LOCK_UN); fclose($handle);
 }
 
-function job_finder_config(string $name): string
+function job_finder_configuration(): array
 {
-    $value = getenv($name);
-    if (!is_string($value) || trim($value) === '') {
-        static $local;
-        if ($local === null) {
-            $path = NEMA_ROOT . '/../job-finder.local.php';
-            $local = is_file($path) ? require $path : [];
-            if (!is_array($local)) {
-                throw new RuntimeException('Invalid private Job-Finder configuration.');
-            }
-        }
-        $value = $local[$name] ?? null;
+    static $configuration;
+    if (is_array($configuration)) {
+        return $configuration;
     }
-    if (!is_string($value) || trim($value) === '') {
-        throw new RuntimeException('Job-Finder configuration missing: ' . $name);
+
+    $configPath = dirname(__DIR__, 2) . '/config/job-finder.local.php';
+    if (!is_file($configPath) || !is_readable($configPath)) {
+        job_finder_json(500, ['success' => false, 'error' => 'Serverkonfiguration nicht verfügbar.']);
     }
-    return trim($value);
+
+    try {
+        $loaded = @include $configPath;
+    } catch (Throwable) {
+        $loaded = null;
+    }
+    if (!is_array($loaded)) {
+        job_finder_json(500, ['success' => false, 'error' => 'Serverkonfiguration nicht verfügbar.']);
+    }
+
+    return $configuration = $loaded;
 }
 
-function job_finder_call(string $urlName, array $options, int $timeout = 120): array
+function job_finder_require_config(array $requiredKeys): array
 {
-    $url = job_finder_config($urlName);
+    $configuration = job_finder_configuration();
+    foreach ($requiredKeys as $key) {
+        if (!is_string($key) || !isset($configuration[$key]) || !is_string($configuration[$key])
+            || trim($configuration[$key]) === '') {
+            job_finder_json(500, ['success' => false, 'error' => 'Serverkonfiguration nicht verfügbar.']);
+        }
+        $configuration[$key] = trim($configuration[$key]);
+    }
+    return $configuration;
+}
+
+function job_finder_call(string $url, string $secret, array $options, int $timeout = 120): array
+{
     $parts = parse_url($url);
     if (!is_array($parts) || ($parts['scheme'] ?? '') !== 'https' || empty($parts['host']) || isset($parts['user']) || isset($parts['pass'])) {
         throw new RuntimeException('Invalid Job-Finder endpoint configuration.');
     }
-    $secret = job_finder_config('N8N_JOB_FINDER_SECRET');
     $curl = curl_init($url);
     curl_setopt_array($curl, $options + [
         CURLOPT_RETURNTRANSFER => true,

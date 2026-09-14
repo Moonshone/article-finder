@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 require_once __DIR__ . '/../app/job-finder.php';
+$config = job_finder_require_config(['upload_url', 'secret']);
 
 try {
     job_finder_require_request('multipart/form-data');
@@ -17,7 +18,7 @@ try {
     $signature = file_get_contents($file['tmp_name'], false, null, 0, 5);
     if ($mime !== 'application/pdf' || $signature !== '%PDF-') throw new InvalidArgumentException('type');
 
-    $response = job_finder_call('N8N_JOB_FINDER_UPLOAD_URL', [CURLOPT_POST => true, CURLOPT_POSTFIELDS => [
+    $response = job_finder_call($config['upload_url'], $config['secret'], [CURLOPT_POST => true, CURLOPT_POSTFIELDS => [
         'lebenslauf' => new CURLFile($file['tmp_name'], 'application/pdf', 'lebenslauf.pdf'),
     ]]);
     $profileId = $response['profile_id'] ?? null;
