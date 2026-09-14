@@ -13,10 +13,15 @@ Der Admin ist unter `/admin/`, die öffentliche Übersicht unter `/stories/` err
 
 ## Job-Finder mit n8n verbinden
 
-Der Job-Finder unter `/sites/job-finder.php` kommuniziert ausschließlich über die PHP-Proxys in `/api/` mit n8n. Vor dem produktiven Einsatz müssen diese Werte in der privaten Serverumgebung (nicht im Webroot und nicht im Repository) gesetzt werden:
+Der Browser kommuniziert ausschließlich mit den PHP-Proxys unter `/api/`. Lege auf dem Server **außerhalb des Repository-/Webroot-Verzeichnisses** die Datei `../job-finder.local.php` an (bei diesem Deployment also neben dem Verzeichnis `article-finder`):
 
-- `N8N_JOB_FINDER_UPLOAD_URL`: vollständige HTTPS-URL des Upload-Webhooks
-- `N8N_JOB_FINDER_SEARCH_URL`: vollständige HTTPS-URL des Such-Webhooks
-- `N8N_JOB_FINDER_WEBHOOK_SECRET`: gemeinsames Bearer-Secret für die authentifizierte Server-zu-Server-Kommunikation
+```php
+<?php
+return [
+    'N8N_JOB_FINDER_UPLOAD_URL' => 'https://appwbs.app.n8n.cloud/webhook/job-finder/cv-upload',
+    'N8N_JOB_FINDER_SEARCH_URL' => 'https://appwbs.app.n8n.cloud/webhook/job-finder/search',
+    'N8N_JOB_FINDER_SECRET' => 'HIER_DAS_NEUE_GEHEIME_SECRET_EINTRAGEN',
+];
+```
 
-PHP benötigt die Erweiterungen cURL, Fileinfo, JSON und mbstring. Die Webhooks müssen die in der UI erwarteten JSON-Strukturen liefern; ohne die drei Konfigurationswerte zeigt die Oberfläche bewusst nur eine neutrale Fehlermeldung.
+Alternativ können dieselben drei Namen als Server-Umgebungsvariablen gesetzt werden; sie haben Vorrang. Die lokale Datei und insbesondere ihr Secret dürfen nicht committed, ausgeliefert oder unter dem Webroot abgelegt werden. PHP benötigt cURL, Fileinfo, JSON und mbstring.

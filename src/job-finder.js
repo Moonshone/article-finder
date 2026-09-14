@@ -46,7 +46,7 @@ async function apiRequest(url, options, timeout = 125000) {
   try {
     const response = await fetch(url, { ...options, signal: controller.signal, credentials: "same-origin", headers: { ...(options.headers || {}), "X-CSRF-Token": csrf } });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.success !== true) throw new Error(data.message || "Die Anfrage konnte nicht abgeschlossen werden.");
+    if (!response.ok || data.success !== true) throw new Error(data.error || "Die Anfrage konnte nicht abgeschlossen werden.");
     return data;
   } catch (error) {
     if (error.name === "AbortError") throw new Error("Die Anfrage hat zu lange gedauert. Bitte versuche es erneut.");
@@ -61,8 +61,8 @@ cvForm.addEventListener("submit", async (event) => {
   if (error) { $("#cvError").textContent = error; return; }
   state.uploading = true; uploadButton.disabled = true; uploadButton.textContent = "Lebenslauf wird verarbeitet …"; message($("#uploadMessage"), "", "");
   try {
-    const body = new FormData(); body.append("cv", file, file.name);
-    await apiRequest("../api/job-finder-upload.php", { method: "POST", body });
+    const body = new FormData(); body.append("lebenslauf", file, file.name);
+    await apiRequest("/api/job-finder-upload.php", { method: "POST", body });
     state.profileReady = true; criteriaFields.disabled = false; criteriaPanel.classList.remove("is-locked"); criteriaPanel.removeAttribute("aria-disabled");
     message($("#uploadMessage"), "✓ Lebenslauf erfolgreich verarbeitet", "success");
   } catch (requestError) { state.profileReady = false; message($("#uploadMessage"), requestError.message || "Der Lebenslauf konnte nicht verarbeitet werden."); }
@@ -78,7 +78,7 @@ function startStatus() {
 function text(tag, value, className = "") { const node = document.createElement(tag); node.className = className; node.textContent = String(value ?? "–"); return node; }
 function cleanString(value, fallback = "–", max = 300) { return typeof value === "string" && value.trim() ? value.trim().slice(0, max) : fallback; }
 function safeList(value) { return Array.isArray(value) ? value.filter((item) => typeof item === "string").slice(0, 10) : []; }
-function safeUrl(value) { try { const url = new URL(value); return url.protocol === "https:" ? url.href : null; } catch { return null; } }
+function safeUrl(value) { try { const url = new URL(value); return ["https:", "http:"].includes(url.protocol) ? url.href : null; } catch { return null; } }
 
 function renderJobs(jobs) {
   const list = Array.isArray(jobs) ? jobs.slice(0, 100) : [];
@@ -86,21 +86,23 @@ function renderJobs(jobs) {
   list.forEach((job) => {
     if (!job || typeof job !== "object") return;
     const score = Math.max(0, Math.min(100, Number(job.match_score ?? job.score) || 0));
-    const category = score >= 80 ? "A" : score >= 65 ? "B" : "C";
+    const suppliedCategory = typeof job.kategorie === "string" ? job.kategorie.toUpperCase() : "";
+    const category = ["A", "B", "C"].includes(suppliedCategory) ? suppliedCategory : score >= 80 ? "A" : score >= 65 ? "B" : "C";
     const card = document.createElement("article"); card.className = "job-card";
     card.append(text("span", `${category} · ${Math.round(score)} % Match`, `match-badge match-${category.toLowerCase()}`));
-    card.append(text("h3", cleanString(job.title ?? job.jobtitel, "Stellenangebot", 150)));
+    card.append(text("p", cleanString(job.berufsbereich, "Berufsbereich nicht angegeben", 80), "job-source"));
+    card.append(text("h3", cleanString(job.stellenbezeichnung, "Stellenangebot", 150)));
     card.append(text("div", cleanString(job.company ?? job.unternehmen, "Unternehmen nicht angegeben", 150), "job-company"));
-    card.append(text("p", [job.location ?? job.ort, job.work_model ?? job.arbeitsform, job.employment_type ?? job.beschaeftigungsart].map((v) => cleanString(v, "", 80)).filter(Boolean).join(" · "), "job-meta"));
+    card.append(text("p", [job.ort, job.remote, job.beschaeftigungsart].map((v) => cleanString(v, "", 80)).filter(Boolean).join(" · "), "job-meta"));
     const details = document.createElement("div"); details.className = "job-details";
-    [["Warum es passt", safeList(job.reasons ?? job.warum_es_passt)], ["Mögliche Lücken", safeList(job.gaps ?? job.moegliche_luecken)]].forEach(([heading, values]) => {
+    [["Warum es passt", safeList(job.warum_passend)], ["Mögliche Lücken", safeList(job.luecken)]].forEach(([heading, values]) => {
       const block = document.createElement("div"); block.append(text("h4", heading)); const ul = document.createElement("ul");
       (values.length ? values : ["Keine Angaben"]).forEach((value) => ul.append(text("li", cleanString(value, "–", 300)))); block.append(ul); details.append(block);
     }); card.append(details);
-    const sourceBits = [job.source ?? job.quelle, job.published_at ?? job.veroeffentlicht].map((v) => cleanString(v, "", 80)).filter(Boolean);
-    if (job.verified === true || job.verifiziert === true) sourceBits.push("✓ verifiziert");
+    const sourceBits = [job.quelle, job.veroeffentlicht].map((v) => cleanString(v, "", 80)).filter(Boolean);
+    sourceBits.push(job.verifiziert === true ? "✓ verifiziert" : "nicht verifiziert");
     card.append(text("p", sourceBits.join(" · "), "job-source"));
-    const url = safeUrl(job.url ?? job.link); if (url) { const link = text("a", "Stellenanzeige öffnen ↗", "job-link"); link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer"; card.append(link); }
+    const url = safeUrl(job.url); if (url) { const link = text("a", "STELLENANZEIGE ÖFFNEN", "job-link"); link.href = url; link.target = "_blank"; link.rel = "noopener noreferrer"; card.append(link); }
     cards.append(card);
   });
   const count = cards.childElementCount; $("#jobCount").textContent = `${count} ${count === 1 ? "Stelle" : "Stellen"}`;
@@ -110,14 +112,15 @@ function renderJobs(jobs) {
 
 searchForm.addEventListener("submit", async (event) => {
   event.preventDefault(); if (state.searching || !state.profileReady) return;
-  const job = $("#job").value.trim(), ort = $("#ort").value.trim();
-  $("#jobError").textContent = job ? "" : "Bitte gib eine Tätigkeit ein."; $("#ortError").textContent = ort ? "" : "Bitte gib einen Ort ein.";
-  if (!job || !ort) { (!job ? $("#job") : $("#ort")).focus(); return; }
+  const job = $("#job").value.trim(), ort = $("#ort").value.trim(), mode = document.querySelector('[name="suchmodus"]:checked').value;
+  const areas = [...document.querySelectorAll('[name="berufsbereiche"]:checked')].map((item) => item.value);
+  $("#jobError").textContent = mode === "bestimmter_job" && !job ? "Bitte gib eine Tätigkeit ein." : ""; $("#ortError").textContent = ort ? "" : "Bitte gib einen Ort ein.";
+  if ((mode === "bestimmter_job" && !job) || !ort || (mode === "mehrere_berufsbereiche" && !areas.length)) { (mode === "bestimmter_job" && !job ? $("#job") : $("#ort")).focus(); return; }
   const data = new FormData(searchForm);
-  const payload = { job, ort, radius: data.get("radius") === "egal" ? "egal" : Number(data.get("radius")), remote: data.get("remote"), beschaeftigungsart: data.get("beschaeftigungsart"), webseiten: data.getAll("webseiten"), ausschluesse: String(data.get("ausschluesse") || "").split(",").map((v) => v.trim()).filter(Boolean) };
+  const payload = { suchmodus: mode, job: mode === "bestimmter_job" ? job : "", berufsbereiche: mode === "mehrere_berufsbereiche" ? areas : [], ort, radius: data.get("radius") === "egal" ? "egal" : Number(data.get("radius")), remote: data.get("remote"), beschaeftigungsart: data.get("beschaeftigungsart"), webseiten: data.getAll("webseiten"), ausschluesse: String(data.get("ausschluesse") || "").split(",").map((v) => v.trim()).filter(Boolean) };
   state.searching = true; searchButton.disabled = true; searchButton.textContent = "Suche läuft …"; message($("#searchError"), "", "");
   $("#emptyState").hidden = true; $("#jobResults").hidden = true; $("#statusPanel").hidden = false; startStatus();
-  try { const result = await apiRequest("../api/job-finder-search.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }); renderJobs(result.jobs); }
+  try { const result = await apiRequest("/api/job-finder-search.php", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }, 190000); renderJobs(result.ergebnisse); }
   catch (requestError) { message($("#searchError"), requestError.message || "Die Job-Suche konnte momentan nicht abgeschlossen werden."); $("#emptyState").hidden = false; }
   finally { clearInterval(state.statusTimer); document.querySelectorAll("#statusList li").forEach((item) => item.className = "done"); setTimeout(() => { $("#statusPanel").hidden = true; }, 500); state.searching = false; searchButton.disabled = false; searchButton.textContent = "Jobs suchen"; }
 });
