@@ -18,10 +18,11 @@ Der Browser kommuniziert ausschließlich mit den PHP-Proxys unter `/api/`. Lege 
 ```php
 <?php
 return [
-    'upload_url' => 'HIER_DIE_PRODUCTION_UPLOAD_URL_EINTRAGEN',
-    'search_url' => 'HIER_DIE_PRODUCTION_SEARCH_URL_EINTRAGEN',
+    'upload_url' => 'https://N8N-BASIS-URL/webhook/job-finder/cv-upload',
+    'search_url' => 'https://N8N-BASIS-URL/webhook/job-finder/search',
     'secret' => 'HIER_DAS_NEUE_GEHEIME_SECRET_EINTRAGEN',
 ];
 ```
 
 Die lokale Datei und insbesondere ihr Secret dürfen nicht committed, ausgeliefert oder unter dem Webroot abgelegt werden. PHP benötigt cURL, Fileinfo, JSON und mbstring.
+Die beiden Werte müssen die Production-Webhooks des Workflows verwenden; URL und `X-Job-Finder-Secret` werden ausschließlich vom PHP-Proxy an n8n gesendet.
