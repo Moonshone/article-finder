@@ -159,6 +159,23 @@ function job_finder_string_array(mixed $value, int $maxItems, int $maxLength): ?
     return $result;
 }
 
+function job_finder_occupations(mixed $value): ?array
+{
+    if (!is_array($value) || count($value) > 8 || ($value !== [] && !array_is_list($value))) return null;
+    $result = [];
+    $seen = [];
+    foreach ($value as $item) {
+        $clean = job_finder_text($item, 80);
+        if ($clean === null) return null;
+        if ($clean === '') continue;
+        $key = mb_strtolower($clean, 'UTF-8');
+        if (isset($seen[$key])) continue;
+        $seen[$key] = true;
+        $result[] = $clean;
+    }
+    return $result;
+}
+
 function job_finder_text(mixed $value, int $max, bool $required = false): ?string
 {
     if (!is_string($value)) return null;

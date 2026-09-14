@@ -18,7 +18,7 @@ try {
 
     $mode = $input['suchmodus'] ?? null;
     $job = job_finder_text($input['job'] ?? null, 120) ?? throw new InvalidArgumentException('job');
-    $areas = job_finder_string_array($input['berufsbereiche'] ?? null, 10, 80);
+    $areas = job_finder_occupations($input['berufsbereiche'] ?? null);
     $ort = job_finder_text($input['ort'] ?? null, 100, true);
     $radius = $input['radius'] ?? null;
     $remote = $input['remote'] ?? null;
@@ -30,9 +30,13 @@ try {
         || !in_array($remote, ['egal', 'remote', 'hybrid', 'vor_ort'], true)
         || !in_array($employment, ['egal', 'Vollzeit', 'Teilzeit', 'Freelancer'], true)
         || $sources === null || $exclusions === null) throw new InvalidArgumentException('fields');
-    $standardAreas = ['Content Creator', 'Scrum Master', 'Projektmanagement'];
-    if (($mode === 'mehrere_berufsbereiche' && ($areas === [] || array_diff($areas, $standardAreas)))
-        || ($mode === 'bestimmter_job' && ($job === '' || $areas !== []))) throw new InvalidArgumentException('mode');
+    if ($mode === 'mehrere_berufsbereiche') {
+        if ($areas === []) throw new InvalidArgumentException('mode');
+        $job = '';
+    } elseif ($mode === 'bestimmter_job') {
+        if ($job === '') throw new InvalidArgumentException('mode');
+        $areas = [];
+    }
     $allowedSources = ['unternehmensseiten', 'stepstone.de', 'arbeitsagentur.de', 'indeed.com', 'linkedin.com'];
     if (array_diff($sources, $allowedSources)) throw new InvalidArgumentException('sources');
 

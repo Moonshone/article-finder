@@ -11,6 +11,7 @@ const criteriaPanel = $("#criteriaPanel");
 const criteriaFields = $("#criteriaFields");
 const searchForm = $("#jobSearchForm");
 const searchButton = $("#jobSearchButton");
+const modeInputs = [...document.querySelectorAll('[name="suchmodus"]')];
 
 function message(element, text, type = "error") {
   element.textContent = text;
@@ -80,6 +81,34 @@ function cleanString(value, fallback = "–", max = 300) { return typeof value =
 function safeList(value) { return Array.isArray(value) ? value.filter((item) => typeof item === "string").slice(0, 10) : []; }
 function safeUrl(value) { try { const url = new URL(value); return ["https:", "http:"].includes(url.protocol) ? url.href : null; } catch { return null; } }
 
+function selectedSearchMode() {
+  return document.querySelector('[name="suchmodus"]:checked')?.value || "mehrere_berufsbereiche";
+}
+
+function parseOccupations(value) {
+  const occupations = [];
+  const seen = new Set();
+  String(value).split(/[,\r\n]+/).forEach((part) => {
+    const occupation = part.trim();
+    const key = occupation.toLocaleLowerCase("de-DE");
+    if (occupation && !seen.has(key)) { seen.add(key); occupations.push(occupation); }
+  });
+  return occupations;
+}
+
+function updateSearchMode() {
+  const multiple = selectedSearchMode() === "mehrere_berufsbereiche";
+  $("#areasField").hidden = !multiple;
+  $("#jobField").hidden = multiple;
+  $("#areas").required = multiple;
+  $("#job").required = !multiple;
+  $("#areasError").textContent = "";
+  $("#jobError").textContent = "";
+}
+
+modeInputs.forEach((input) => input.addEventListener("change", updateSearchMode));
+updateSearchMode();
+
 function renderJobs(jobs) {
   const list = Array.isArray(jobs) ? jobs.slice(0, 100) : [];
   const cards = $("#jobCards"); cards.replaceChildren();
@@ -112,10 +141,15 @@ function renderJobs(jobs) {
 
 searchForm.addEventListener("submit", async (event) => {
   event.preventDefault(); if (state.searching || !state.profileReady) return;
-  const job = $("#job").value.trim(), ort = $("#ort").value.trim(), mode = document.querySelector('[name="suchmodus"]:checked').value;
-  const areas = [...document.querySelectorAll('[name="berufsbereiche"]:checked')].map((item) => item.value);
-  $("#jobError").textContent = mode === "bestimmter_job" && !job ? "Bitte gib eine Tätigkeit ein." : ""; $("#ortError").textContent = ort ? "" : "Bitte gib einen Ort ein.";
-  if ((mode === "bestimmter_job" && !job) || !ort || (mode === "mehrere_berufsbereiche" && !areas.length)) { (mode === "bestimmter_job" && !job ? $("#job") : $("#ort")).focus(); return; }
+  const job = $("#job").value.trim(), ort = $("#ort").value.trim(), mode = selectedSearchMode();
+  const areas = parseOccupations($("#areas").value);
+  let areasError = "";
+  if (mode === "mehrere_berufsbereiche" && !areas.length) areasError = "Bitte gib mindestens einen Beruf oder eine Tätigkeit ein.";
+  else if (mode === "mehrere_berufsbereiche" && areas.length > 8) areasError = "Bitte gib maximal 8 Berufe oder Tätigkeiten ein.";
+  else if (mode === "mehrere_berufsbereiche" && areas.some((area) => [...area].length > 80)) areasError = "Jeder Eintrag darf maximal 80 Zeichen lang sein.";
+  const jobError = mode === "bestimmter_job" && !job ? "Bitte gib eine Tätigkeit ein." : "";
+  $("#areasError").textContent = areasError; $("#jobError").textContent = jobError; $("#ortError").textContent = ort ? "" : "Bitte gib einen Ort ein.";
+  if (areasError || jobError || !ort) { (areasError ? $("#areas") : jobError ? $("#job") : $("#ort")).focus(); return; }
   const data = new FormData(searchForm);
   const payload = { suchmodus: mode, job: mode === "bestimmter_job" ? job : "", berufsbereiche: mode === "mehrere_berufsbereiche" ? areas : [], ort, radius: data.get("radius") === "egal" ? "egal" : Number(data.get("radius")), remote: data.get("remote"), beschaeftigungsart: data.get("beschaeftigungsart"), webseiten: data.getAll("webseiten"), ausschluesse: String(data.get("ausschluesse") || "").split(",").map((v) => v.trim()).filter(Boolean) };
   state.searching = true; searchButton.disabled = true; searchButton.textContent = "Suche läuft …"; message($("#searchError"), "", "");
