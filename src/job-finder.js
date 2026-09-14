@@ -46,7 +46,11 @@ async function apiRequest(url, options, timeout = 125000) {
   try {
     const response = await fetch(url, { ...options, signal: controller.signal, credentials: "same-origin", headers: { ...(options.headers || {}), "X-CSRF-Token": csrf } });
     const data = await response.json().catch(() => ({}));
-    if (!response.ok || data.success !== true) throw new Error(data.error || "Die Anfrage konnte nicht abgeschlossen werden.");
+    if (!response.ok || data.success !== true) {
+      const error = new Error(data.error || "Die Anfrage konnte nicht abgeschlossen werden.");
+      error.reason = typeof data.reason === "string" ? data.reason : "";
+      throw error;
+    }
     return data;
   } catch (error) {
     if (error.name === "AbortError") throw new Error("Die Anfrage hat zu lange gedauert. Bitte versuche es erneut.");

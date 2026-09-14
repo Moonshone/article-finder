@@ -26,6 +26,29 @@ function job_finder_session(): void
     session_start();
 }
 
+function job_finder_csrf_token(): string
+{
+    if (!isset($_SESSION['job_finder_csrf']) || !is_string($_SESSION['job_finder_csrf'])
+        || !preg_match('/\A[a-f0-9]{64}\z/', $_SESSION['job_finder_csrf'])) {
+        $_SESSION['job_finder_csrf'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['job_finder_csrf'];
+}
+
+function job_finder_csrf_failure(mixed $submittedToken): ?string
+{
+    if (!is_string($submittedToken) || $submittedToken === '') {
+        return 'missing_header';
+    }
+    if (!isset($_SESSION['job_finder_csrf']) || !is_string($_SESSION['job_finder_csrf'])) {
+        return 'missing_session_token';
+    }
+    if (!hash_equals($_SESSION['job_finder_csrf'], $submittedToken)) {
+        return 'token_mismatch';
+    }
+    return null;
+}
+
 function job_finder_json(int $status, array $payload): never
 {
     http_response_code($status);
@@ -46,9 +69,17 @@ function job_finder_require_request(string $contentType = ''): void
         job_finder_json(415, ['success' => false, 'error' => 'Ungültiges Anfrageformat.']);
     }
     job_finder_session();
-    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? '';
-    if (!is_string($token) || !isset($_SESSION['job_finder_csrf']) || !hash_equals($_SESSION['job_finder_csrf'], $token)) {
-        job_finder_json(403, ['success' => false, 'error' => 'Die Anfrage konnte nicht verifiziert werden.']);
+    $failure = job_finder_csrf_failure($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
+    if ($failure !== null) {
+        error_log('Job-Finder CSRF verification failed: ' . $failure);
+        $expired = $failure !== 'missing_header';
+        job_finder_json(403, [
+            'success' => false,
+            'error' => $expired
+                ? 'Deine Sitzung ist nicht mehr aktuell. Bitte lade diese Seite neu und versuche es erneut.'
+                : 'Die Anfrage konnte nicht verifiziert werden.',
+            'reason' => $expired ? 'session_expired' : 'csrf_failed',
+        ]);
     }
 }
 

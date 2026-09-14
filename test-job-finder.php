@@ -23,6 +23,24 @@ function assert_invalid(array $input, string $profileId, string $message): void
     }
 }
 
+job_finder_session();
+$_SESSION = [];
+assert_true(job_finder_csrf_failure(null) === 'missing_header', 'missing CSRF header is identified');
+$csrfToken = job_finder_csrf_token();
+assert_true((bool) preg_match('/\A[a-f0-9]{64}\z/', $csrfToken), 'CSRF token has the expected shape');
+assert_true(job_finder_csrf_failure($csrfToken) === null, 'current session token is accepted');
+assert_true(job_finder_csrf_failure(str_repeat('0', 64)) === 'token_mismatch', 'wrong CSRF token is rejected');
+unset($_SESSION['job_finder_csrf']);
+assert_true(job_finder_csrf_failure($csrfToken) === 'missing_session_token', 'expired session is identified');
+$_SESSION['job_finder_csrf'] = $csrfToken;
+assert_true(session_regenerate_id(true), 'session ID can be regenerated after an upload');
+assert_true(job_finder_csrf_failure($csrfToken) === null, 'CSRF token survives session regeneration');
+assert_true(session_regenerate_id(true), 'session ID can be regenerated after a repeated upload');
+assert_true(job_finder_csrf_failure($csrfToken) === null, 'repeated regeneration preserves the token association');
+
+$page = file_get_contents(__DIR__ . '/sites/job-finder.php');
+assert_true(is_string($page) && str_contains($page, "Cache-Control: no-store, private, max-age=0"), 'token-bearing page explicitly disables caching');
+
 $profileId = '550e8400-e29b-41d4-a716-446655440000';
 $valid = [
     'profile_id' => $profileId,
@@ -77,5 +95,7 @@ foreach ([[], ['success' => false, 'output' => 'x'], ['success' => true], ['succ
 $javascript = file_get_contents(__DIR__ . '/src/job-finder.js');
 assert_true(is_string($javascript) && str_contains($javascript, 'result.textContent = output'), 'n8n output uses textContent');
 assert_true(!str_contains($javascript, 'innerHTML'), 'frontend does not use innerHTML');
+assert_true(str_contains($javascript, 'credentials: "same-origin"'), 'frontend sends the session cookie');
+assert_true(str_contains($javascript, '"X-CSRF-Token": csrf'), 'frontend sends the CSRF header');
 
 echo "All Job-Finder tests passed.\n";
