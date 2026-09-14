@@ -3,13 +3,15 @@ declare(strict_types=1);
 require_once __DIR__ . '/../app/job-finder.php';
 security_headers();
 job_finder_session();
-if (!isset($_SESSION['job_finder_csrf'])) $_SESSION['job_finder_csrf'] = bin2hex(random_bytes(32));
+$csrfToken = job_finder_csrf_token();
+header('Cache-Control: no-store, private, max-age=0');
+header('Pragma: no-cache');
 ?>
 <!DOCTYPE html>
 <html lang="de"><head>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Job-Finder: Finde passende Stellen auf Basis deines anonymisierten Lebenslaufs.">
-  <meta name="csrf-token" content="<?= e($_SESSION['job_finder_csrf']) ?>">
+  <meta name="csrf-token" content="<?= e($csrfToken) ?>">
   <title>Job-Finder</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
