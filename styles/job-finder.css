@@ -24,3 +24,7 @@
 .job-cards { display: grid; gap: 16px; }.job-card { padding: clamp(20px, 3vw, 30px); border: 1px solid var(--line); border-radius: 18px; background: #fcfdfc; }.match-badge { display: inline-flex; padding: 6px 10px; border-radius: 99px; color: var(--green); background: var(--mint); font-size: 11px; font-weight: 700; letter-spacing: .05em; }.job-card h3 { margin: 16px 0 4px; font-size: 22px; }.job-company, .job-meta, .job-source { color: var(--muted); }.job-meta { margin: 12px 0 22px; }.job-details { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }.job-details h4 { margin: 0 0 8px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; }.job-details ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 13px; line-height: 1.7; }.job-source { margin: 22px 0 14px; font-size: 12px; }.job-link { display: inline-flex; min-height: 44px; align-items: center; padding: 0 16px; border-radius: 10px; color: white; background: var(--green); font-size: 12px; font-weight: 700; text-decoration: none; text-transform: uppercase; }
 @media (max-width: 900px) { .job-workspace { grid-template-columns: 1fr; }.job-output { grid-row: auto; } }
 @media (max-width: 620px) { .job-shell { width: min(100% - 24px, 1280px); }.job-steps { align-items: stretch; flex-direction: column; }.job-panel, .job-empty, #jobResults { padding: 20px; border-radius: 18px; }.choice-row, .job-details { grid-template-columns: 1fr; }.job-card h3 { font-size: 19px; } }
+.job-result-output {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}

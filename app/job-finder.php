@@ -5,6 +5,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/bootstrap.php';
 
 const JOB_FINDER_MAX_FILE_SIZE = 5 * 1024 * 1024;
+const JOB_FINDER_MAX_SEARCH_BODY_SIZE = 16384;
 
 function job_finder_session(): void
 {
@@ -174,6 +175,80 @@ function job_finder_occupations(mixed $value): ?array
         $result[] = $clean;
     }
     return $result;
+}
+
+function job_finder_profile_id(mixed $value): ?string
+{
+    if (!is_string($value) || strlen($value) > 128
+        || !preg_match('/\A[A-Za-z0-9_-]{16,128}\z/', $value)) {
+        return null;
+    }
+    return $value;
+}
+
+/** Validate the browser payload and create the only three fields accepted by n8n. */
+function job_finder_search_payload(mixed $input, string $sessionProfileId): array
+{
+    $allowedKeys = ['profile_id', 'jobs', 'ort', 'radius', 'remote', 'beschaeftigungsart', 'webseiten', 'ausschluesse'];
+    if (!is_array($input) || array_diff(array_keys($input), $allowedKeys)) {
+        throw new InvalidArgumentException('keys');
+    }
+
+    $profileId = job_finder_profile_id($input['profile_id'] ?? null);
+    $storedProfileId = job_finder_profile_id($sessionProfileId);
+    $jobs = job_finder_occupations($input['jobs'] ?? null);
+    $ort = job_finder_text($input['ort'] ?? null, 100, true);
+    $radius = $input['radius'] ?? null;
+    $remote = $input['remote'] ?? null;
+    $employment = $input['beschaeftigungsart'] ?? null;
+    $sources = job_finder_string_array($input['webseiten'] ?? null, 5, 80);
+    $exclusions = job_finder_text($input['ausschluesse'] ?? null, 500);
+
+    $allowedRadii = [10, 25, 50, 100, 'egal'];
+    $remoteLabels = ['egal' => 'Egal', 'remote' => 'Remote', 'hybrid' => 'Hybrid', 'vor_ort' => 'Vor Ort'];
+    $employmentLabels = ['egal' => 'Egal', 'Vollzeit' => 'Vollzeit', 'Teilzeit' => 'Teilzeit', 'Freelancer' => 'Freelancer'];
+    $sourceLabels = [
+        'unternehmensseiten' => 'Unternehmensseiten',
+        'stepstone.de' => 'StepStone',
+        'arbeitsagentur.de' => 'Bundesagentur für Arbeit',
+        'indeed.com' => 'Indeed',
+        'linkedin.com' => 'LinkedIn',
+    ];
+    if ($profileId === null || $storedProfileId === null || !hash_equals($storedProfileId, $profileId)
+        || $jobs === null || $jobs === [] || $ort === null
+        || !in_array($radius, $allowedRadii, true)
+        || !is_string($remote) || !isset($remoteLabels[$remote])
+        || !is_string($employment) || !isset($employmentLabels[$employment])
+        || $sources === null || $sources === [] || $exclusions === null
+        || array_diff($sources, array_keys($sourceLabels))) {
+        throw new InvalidArgumentException('fields');
+    }
+
+    $radiusText = $radius === 'egal' ? 'Egal' : $radius . ' km';
+    $sourceText = implode(', ', array_map(static fn(string $source): string => $sourceLabels[$source], $sources));
+    $chatInput = "Gesuchter Beruf:\n" . implode(', ', $jobs)
+        . "\n\nOrt:\n{$ort}"
+        . "\n\nUmkreis:\n{$radiusText}"
+        . "\n\nArbeitsform / Remote-Wunsch:\n{$remoteLabels[$remote]}"
+        . "\n\nBeschäftigungsart:\n{$employmentLabels[$employment]}"
+        . "\n\nGewünschte Webseiten:\n{$sourceText}"
+        . "\n\nAusschlusskriterien:\n{$exclusions}";
+
+    return [
+        'profile_id' => $profileId,
+        'sessionId' => bin2hex(random_bytes(16)),
+        'chatInput' => $chatInput,
+    ];
+}
+
+function job_finder_search_output(array $response): string
+{
+    $output = $response['output'] ?? null;
+    if (($response['success'] ?? false) !== true || !is_string($output) || $output === ''
+        || strlen($output) > 2 * 1024 * 1024) {
+        throw new RuntimeException('Invalid search response.');
+    }
+    return $output;
 }
 
 function job_finder_text(mixed $value, int $max, bool $required = false): ?string
