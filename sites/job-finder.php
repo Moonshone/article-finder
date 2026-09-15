@@ -17,7 +17,7 @@ header('Pragma: no-cache');
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/style.css"><link rel="stylesheet" href="../styles/job-finder.css">
 </head><body><div class="page-shell job-shell">
-  <header class="site-header"><nav class="main-nav" aria-label="Hauptnavigation"><a class="nav-link" href="../index.html">Home</a><a class="nav-link" href="kunst.html">Kunst</a><a class="nav-link active" href="ai-me.html">AI &amp; Me</a></nav></header>
+  <header class="site-header"><nav class="main-nav" aria-label="Hauptnavigation"><a class="nav-link" href="/">Home</a><a class="nav-link" href="kunst.html">Kunst</a><a class="nav-link active" href="ai-me.html">AI &amp; Me</a></nav></header>
   <main class="job-finder">
     <section class="hero job-hero" aria-labelledby="page-title"><span class="eyebrow">AI&amp;me · Job-Finder</span><h1 id="page-title">Dein Profil.<br><span>Deine passenden Stellen.</span></h1><p>Vom anonymisierten Lebenslauf zu nachvollziehbar bewerteten Job-Matches – ruhig, sicher und fokussiert.</p><ol class="job-steps" aria-label="Ablauf"><li><b>01</b> Lebenslauf</li><li><b>02</b> Suchkriterien</li><li><b>03</b> Stellen</li></ol></section>
     <div id="jobWorkspace" class="job-workspace">
