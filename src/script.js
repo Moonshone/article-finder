@@ -1356,11 +1356,30 @@ if (heroBackground) {
     const isMobile = width <= 760;
     const isTablet = width <= 1100;
     const visibleCount = isMobile ? 8 : (isTablet ? 12 : heroShapes.length);
-    const radiusX = width * (isMobile ? .39 : (isTablet ? .39 : .41));
-    const radiusY = height * (isMobile ? .35 : (isTablet ? .38 : .4));
+    const visibleShapes = heroShapes.slice(0, visibleCount);
+    const largestRotatedHalfSize = visibleShapes.reduce((largest, shape, index) => {
+      const angle = index * Math.PI * 2 / visibleCount;
+      const halfWidth = shape.offsetWidth / 2;
+      const halfHeight = shape.offsetHeight / 2;
+      const rotatedHalfWidth = Math.abs(Math.cos(angle)) * halfWidth + Math.abs(Math.sin(angle)) * halfHeight;
+      const rotatedHalfHeight = Math.abs(Math.sin(angle)) * halfWidth + Math.abs(Math.cos(angle)) * halfHeight;
+      return {
+        x: Math.max(largest.x, rotatedHalfWidth),
+        y: Math.max(largest.y, rotatedHalfHeight)
+      };
+    }, { x: 0, y: 0 });
+    const edgeGap = 4;
+    const radiusX = Math.max(0, Math.min(
+      width * (isMobile ? .39 : (isTablet ? .39 : .41)),
+      width / 2 - largestRotatedHalfSize.x - edgeGap
+    ));
+    const radiusY = Math.max(0, Math.min(
+      height * (isMobile ? .35 : (isTablet ? .38 : .4)),
+      height / 2 - largestRotatedHalfSize.y - edgeGap
+    ));
     const form = reduceMotion.matches ? "circle" : formNames[formIndex];
 
-    heroShapes.slice(0, visibleCount).forEach((shape, index) => {
+    visibleShapes.forEach((shape, index) => {
       const point = positionFor(form, index / visibleCount, radiusX, radiusY);
       shape.style.setProperty("--x", `${point.x.toFixed(1)}px`);
       shape.style.setProperty("--y", `${point.y.toFixed(1)}px`);
