@@ -41,7 +41,6 @@ $pageImages = home_page_images();
       <section class="home-feature reveal" aria-labelledby="art-title">
         <div class="home-feature__heading">
           <h2 id="art-title">ART</h2>
-          <span class="home-feature__number" aria-hidden="true">01</span>
         </div>
 <?php if ($pageImages['home_art'] !== ''): ?>
         <a class="home-feature__media" href="sites/kunst.php" aria-label="Kunst entdecken"><img src="<?= e($pageImages['home_art']) ?>" alt="" loading="lazy" data-page-image></a>
@@ -55,7 +54,6 @@ $pageImages = home_page_images();
       <section class="home-feature home-feature--reverse reveal" aria-labelledby="ai-title">
         <div class="home-feature__heading">
           <h2 id="ai-title">AI &amp; ME</h2>
-          <span class="home-feature__number" aria-hidden="true">02</span>
         </div>
 <?php if ($pageImages['home_ai'] !== ''): ?>
         <a class="home-feature__media" href="sites/ai-me.html" aria-label="AI &amp; Me entdecken"><img src="<?= e($pageImages['home_ai']) ?>" alt="" loading="lazy" data-page-image></a>
@@ -69,7 +67,6 @@ $pageImages = home_page_images();
       <section class="home-feature reveal" aria-labelledby="stories-title">
         <div class="home-feature__heading">
           <h2 id="stories-title">STORIES</h2>
-          <span class="home-feature__number" aria-hidden="true">03</span>
         </div>
 <?php if ($pageImages['home_stories'] !== ''): ?>
         <a class="home-feature__media" href="stories/" aria-label="Stories entdecken"><img src="<?= e($pageImages['home_stories']) ?>" alt="" loading="lazy" data-page-image></a>
