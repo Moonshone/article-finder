@@ -19,14 +19,6 @@ $pageImages = home_page_images();
   <link rel="stylesheet" href="styles/style.css">
 </head>
 <body class="home-page">
-  <header class="site-header home-header">
-    <nav class="main-nav" aria-label="Hauptnavigation">
-      <a class="nav-link active" href="/" aria-current="page">Home</a>
-      <a class="nav-link" href="sites/kunst.php">Kunst</a>
-      <a class="nav-link" href="sites/ai-me.html">AI &amp; Me</a>
-    </nav>
-  </header>
-
   <main aria-label="Home">
     <section class="home-hero" aria-label="ART · HUMAN · AI">
       <div class="home-hero__background" aria-hidden="true">
