@@ -23,13 +23,17 @@ try {
         CURLOPT_POSTFIELDS => json_encode($payload, JSON_THROW_ON_ERROR),
         CURLOPT_HTTPHEADER => ['Accept: application/json', 'Content-Type: application/json',
             'X-Job-Finder-Secret: ' . $config['secret']],
-    ], 180);
-    job_finder_json(200, ['success' => true, 'output' => job_finder_search_output($response)]);
+    ], 15);
+    if (($response['status'] ?? null) !== 'processing'
+        || job_finder_search_id($response['search_id'] ?? null) === null) {
+        throw new RuntimeException('Invalid search start response.');
+    }
+    job_finder_json(200, $response);
 } catch (InvalidArgumentException) {
     job_finder_json(422, ['success' => false, 'error' => 'Bitte prüfe deine Suchkriterien.']);
 } catch (JobFinderTimeoutException) {
-    job_finder_json(504, ['success' => false, 'error' => 'Die Jobsuche dauert momentan zu lange. Bitte versuche es erneut.']);
+    job_finder_json(504, ['status' => 'fehler', 'success' => false, 'error' => 'Die Verbindung zur Jobsuche hat zu lange gedauert. Bitte versuche es erneut.']);
 } catch (Throwable $exception) {
     error_log('Job-Finder search failed: ' . get_class($exception));
-    job_finder_json(502, ['success' => false, 'error' => 'Die Jobsuche konnte momentan nicht abgeschlossen werden.']);
+    job_finder_json(502, ['status' => 'fehler', 'success' => false, 'error' => 'Die Jobsuche konnte momentan nicht gestartet werden.']);
 }

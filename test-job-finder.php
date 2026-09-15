@@ -61,6 +61,9 @@ assert_true(array_keys($payload) === ['profile_id', 'sessionId', 'chatInput'], '
 assert_true($payload['profile_id'] === $profileId && $payload['chatInput'] === $expected, 'profile and exact chatInput');
 assert_true((bool) preg_match('/\A[a-f0-9]{32}\z/', $payload['sessionId']), 'cryptographically generated session ID shape');
 assert_true($payload['sessionId'] !== job_finder_search_payload($valid, $profileId)['sessionId'], 'new session ID per search');
+assert_true(job_finder_search_id('search_123-ABC') === 'search_123-ABC', 'search ID is accepted');
+assert_true(job_finder_search_id('') === null && job_finder_search_id("bad\nid") === null, 'empty and control-character search IDs are rejected');
+assert_true(job_finder_search_status_url('https://n8n.example/webhook/job-finder/search') === 'https://n8n.example/webhook/job-finder/search-status', 'status URL is derived from the configured search webhook');
 
 $cases = [
     'missing profile' => array_diff_key($valid, ['profile_id' => true]),
@@ -93,9 +96,11 @@ foreach ([[], ['success' => false, 'output' => 'x'], ['success' => true], ['succ
 }
 
 $javascript = file_get_contents(__DIR__ . '/src/job-finder.js');
-assert_true(is_string($javascript) && str_contains($javascript, 'result.textContent = output'), 'n8n output uses textContent');
+assert_true(is_string($javascript) && str_contains($javascript, 'renderJobs(result.ergebnisse)'), 'completed search results use the job-card renderer');
 assert_true(!str_contains($javascript, 'innerHTML'), 'frontend does not use innerHTML');
 assert_true(str_contains($javascript, 'credentials: "same-origin"'), 'frontend sends the session cookie');
 assert_true(str_contains($javascript, '"X-CSRF-Token": csrf'), 'frontend sends the CSRF header');
+assert_true(str_contains($javascript, 'const POLL_INTERVAL_MS = 3000'), 'frontend polls every three seconds');
+assert_true(str_contains($javascript, 'const POLL_TIMEOUT_MS = 4 * 60 * 1000'), 'frontend stops polling after four minutes');
 
 echo "All Job-Finder tests passed.\n";
