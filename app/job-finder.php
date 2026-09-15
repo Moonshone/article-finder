@@ -217,6 +217,26 @@ function job_finder_profile_id(mixed $value): ?string
     return $value;
 }
 
+function job_finder_search_id(mixed $value): ?string
+{
+    if (!is_string($value)) return null;
+    $value = trim($value);
+    if ($value === '' || strlen($value) > 256
+        || preg_match('/[\x00-\x20\x7F]/', $value)) {
+        return null;
+    }
+    return $value;
+}
+
+function job_finder_search_status_url(string $searchUrl): string
+{
+    $url = rtrim($searchUrl, '/');
+    if (!str_ends_with($url, '/webhook/job-finder/search')) {
+        throw new RuntimeException('Invalid Job-Finder search endpoint configuration.');
+    }
+    return substr($url, 0, -strlen('/search')) . '/search-status';
+}
+
 /** Validate the browser payload and create the only three fields accepted by n8n. */
 function job_finder_search_payload(mixed $input, string $sessionProfileId): array
 {
