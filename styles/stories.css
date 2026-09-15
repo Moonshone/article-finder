@@ -12,18 +12,39 @@
 .stories-empty { grid-column: 1 / -1; color: var(--muted); }
 .story-detail { max-width: 850px; margin: auto; padding: clamp(54px, 9vw, 110px) 0; }
 .story-detail .story-back { display: block; margin-bottom: 52px; }
-.story-detail h1 { margin: 14px 0 40px; font-size: clamp(2.8rem, 7vw, 6rem); }
+.story-detail h1, .story-title { margin: 14px 0 40px; font-size: clamp(2.8rem, 7vw, 6rem); font-weight: 700; line-height: 1.08; }
+.story-title > :first-child { margin-top: 0; }
+.story-title > :last-child { margin-bottom: 0; }
+.story-card-excerpt { color: var(--muted); line-height: 1.65; }
 .story-hero { display: block; width: 100%; max-height: 700px; margin-bottom: 48px; object-fit: cover; }
 .story-content { font-size: clamp(1.05rem, 2vw, 1.2rem); line-height: 1.8; }
 .story-content a { color: var(--green); }
 @media (max-width: 680px) { .stories-shell { width: min(100% - 24px, 1280px); } .story-grid { grid-template-columns: 1fr; } .stories-intro h1 { font-size: clamp(3.5rem, 20vw, 7rem); } }
 
-.story-text-small { font-size: .85em; }
-.story-text-normal { font-size: 1em; }
-.story-text-large { font-size: 1.25em; }
-.story-text-xlarge { font-size: 1.55em; }
 .story-align-left { text-align: left; }
 .story-align-center { text-align: center; }
 .story-align-right { text-align: right; }
 .story-admin { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 24px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: .85rem; }
 .story-admin a { color: var(--ink); }
+
+.story-font-12 { font-size: 12px; }
+.story-font-14 { font-size: 14px; }
+.story-font-16 { font-size: 16px; }
+.story-font-18 { font-size: 18px; }
+.story-font-20 { font-size: 20px; }
+.story-font-22 { font-size: 22px; }
+.story-font-24 { font-size: 24px; }
+.story-font-26 { font-size: 26px; }
+.story-font-28 { font-size: 28px; }
+.story-font-30 { font-size: 30px; }
+.story-font-32 { font-size: 32px; }
+.story-font-36 { font-size: 36px; }
+.story-font-40 { font-size: 40px; }
+.story-font-44 { font-size: 44px; }
+.story-font-48 { font-size: 48px; }
+
+@media (max-width: 680px) {
+  .story-font-40 { font-size: min(40px, 12vw); }
+  .story-font-44 { font-size: min(44px, 12vw); }
+  .story-font-48 { font-size: min(48px, 12vw); }
+}
