@@ -39,6 +39,7 @@ try {
         <a class="nav-link" href="/">Home</a>
         <a class="nav-link active" href="kunst.html" aria-current="page">Kunst</a>
         <a class="nav-link" href="ai-me.html">AI &amp; Me</a>
+        <a class="nav-link" href="/stories/">Stories</a>
       </nav>
     </header>
     <main class="art-page">
