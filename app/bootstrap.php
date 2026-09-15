@@ -31,6 +31,33 @@ function e(?string $value): string
     return htmlspecialchars($value ?? '', ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/**
+ * Return the image URLs configured for the four home-page areas.
+ *
+ * A missing table/row or unavailable database deliberately results in an
+ * empty value so the public page remains usable without exposing SQL errors.
+ *
+ * @return array{home: string, home_art: string, home_ai: string, home_stories: string}
+ */
+function home_page_images(): array
+{
+    $images = array_fill_keys(['home', 'home_art', 'home_ai', 'home_stories'], '');
+
+    try {
+        $statement = database()->prepare('SELECT url FROM pages WHERE name = ? LIMIT 1');
+        foreach (array_keys($images) as $pageName) {
+            $statement->execute([$pageName]);
+            $url = $statement->fetchColumn();
+            $images[$pageName] = is_string($url) ? trim($url) : '';
+            $statement->closeCursor();
+        }
+    } catch (Throwable $exception) {
+        error_log('Home page images could not be loaded: ' . $exception->getMessage());
+    }
+
+    return $images;
+}
+
 function security_headers(bool $admin = false): void
 {
     header("Content-Security-Policy: default-src 'self'; img-src 'self' https:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests");
