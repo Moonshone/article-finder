@@ -102,9 +102,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .home-hero { position: relative; display: grid; width: 100%; min-height: 100vh; min-height: 100svh; overflow: hidden; place-items: center; color: #333333; background: var(--paper); }
 .home-hero__background { position: absolute; z-index: 1; inset: 0; overflow: hidden; opacity: .28; pointer-events: none; }
 .home-hero__background::after { position: absolute; inset: 0; background: radial-gradient(ellipse 30% 23% at center, var(--paper) 20%, transparent 100%); content: ""; }
-.home-hero__shape { --x: 0px; --y: 0px; --rotation: 0deg; position: absolute; top: 50%; left: 50%; display: block; width: clamp(60px, 9.5vw, 140px); height: clamp(60px, 9.5vw, 140px); border-radius: 14%; object-fit: cover; transform: translate3d(calc(-50% + var(--x)), calc(-50% + var(--y)), 0) rotate(var(--rotation)); transition: transform 1.6s cubic-bezier(.4, 0, .2, 1), opacity .6s ease; will-change: transform; }
+.home-hero__shape { --x: 0px; --y: 0px; --rotation: 0deg; position: absolute; top: 50%; left: 50%; display: block; width: clamp(60px, 9.5vw, 140px); height: clamp(60px, 9.5vw, 140px); object-fit: contain; object-position: center; transform: translate3d(calc(-50% + var(--x)), calc(-50% + var(--y)), 0) rotate(var(--rotation)); transition: transform 1.6s cubic-bezier(.4, 0, .2, 1), opacity .6s ease; will-change: transform; }
 .home-hero__image { position: absolute; inset: 0; width: 100%; height: 100%; }
-.home-hero__image { object-fit: cover; object-position: center; }
+.home-hero__image { object-fit: contain; object-position: center; }
 .home-hero__content { position: relative; z-index: 2; display: flex; align-items: center; flex-direction: column; padding: 110px 24px 44px; text-align: center; }
 .home-hero p { margin: clamp(24px, 4vh, 40px) 0 0; color: #3f3f3f; font-size: clamp(1.11rem, 1.95vw, 1.425rem); font-weight: 500; letter-spacing: .32em; }
 .enter-link { display: flex; min-width: 72px; min-height: 72px; align-items: center; justify-content: center; flex-direction: column; gap: 8px; margin-top: clamp(54px, 9vh, 92px); color: #333333; font-size: .72rem; font-weight: 600; letter-spacing: .3em; text-decoration: none; text-transform: uppercase; }
