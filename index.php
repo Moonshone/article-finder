@@ -23,7 +23,7 @@ $pageImages = home_page_images();
     <section class="home-hero" aria-label="ART · HUMAN · AI">
       <div class="home-hero__background" aria-hidden="true">
 <?php if ($pageImages['home'] !== ''): ?>
-<?php for ($shape = 1; $shape <= 6; $shape++): ?>
+<?php for ($shape = 1; $shape <= 16; $shape++): ?>
         <img class="home-hero__shape home-hero__shape--<?= $shape ?>" src="<?= e($pageImages['home']) ?>" alt="" draggable="false" data-page-image>
 <?php endfor; ?>
 <?php endif; ?>

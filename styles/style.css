@@ -100,19 +100,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #49a779; outline-offs
 .home-page .home-header .nav-link { color: #333333; text-shadow: 0 1px 16px #0008; }
 .home-page .home-header .nav-link:hover, .home-page .home-header .nav-link:focus-visible, .home-page .home-header .nav-link.active { color: #333333; }
 .home-hero { position: relative; display: grid; width: 100%; min-height: 100vh; min-height: 100svh; overflow: hidden; place-items: center; color: #333333; background: var(--paper); }
-.home-hero__background { position: absolute; z-index: 1; inset: 0; overflow: hidden; opacity: .32; pointer-events: none; }
-.home-hero__shape { position: absolute; display: block; width: clamp(120px, 19vw, 280px); height: clamp(120px, 19vw, 280px); object-fit: cover; will-change: transform, border-radius, clip-path; animation: home-shape-morph 12s ease-in-out infinite alternate; }
-.home-hero__shape--1 { top: 9%; left: 4%; animation-delay: -2s; }
-.home-hero__shape--2 { top: 7%; right: 5%; width: clamp(105px, 16vw, 230px); height: clamp(135px, 21vw, 300px); animation-delay: -8s; }
-.home-hero__shape--3 { top: 40%; left: -3%; animation-delay: -5s; }
-.home-hero__shape--4 { top: 43%; right: -2%; width: clamp(115px, 17vw, 250px); animation-delay: -10s; }
-.home-hero__shape--5 { bottom: 5%; left: 12%; width: clamp(95px, 15vw, 215px); animation-delay: -7s; }
-.home-hero__shape--6 { right: 10%; bottom: 4%; animation-delay: -1s; }
-@keyframes home-shape-morph {
-  0% { border-radius: 50%; clip-path: polygon(8% 8%, 92% 8%, 92% 92%, 8% 92%); transform: rotate(-2deg) scale(.98); }
-  50% { border-radius: 34% 66% 58% 42% / 48% 38% 62% 52%; clip-path: polygon(50% 2%, 96% 27%, 86% 91%, 15% 94%, 3% 34%); transform: translate3d(0, -5px, 0) rotate(3deg) scale(1.02); }
-  100% { border-radius: 18% 48% 22% 55%; clip-path: polygon(12% 0, 100% 12%, 88% 100%, 0 86%); transform: translate3d(4px, 2px, 0) rotate(-1deg) scale(1); }
-}
+.home-hero__background { position: absolute; z-index: 1; inset: 0; overflow: hidden; opacity: .28; pointer-events: none; }
+.home-hero__background::after { position: absolute; inset: 0; background: radial-gradient(ellipse 30% 23% at center, var(--paper) 20%, transparent 100%); content: ""; }
+.home-hero__shape { --x: 0px; --y: 0px; --rotation: 0deg; position: absolute; top: 50%; left: 50%; display: block; width: clamp(60px, 9.5vw, 140px); height: clamp(60px, 9.5vw, 140px); border-radius: 14%; object-fit: cover; transform: translate3d(calc(-50% + var(--x)), calc(-50% + var(--y)), 0) rotate(var(--rotation)); transition: transform 1.6s cubic-bezier(.4, 0, .2, 1), opacity .6s ease; will-change: transform; }
 .home-hero__image { position: absolute; inset: 0; width: 100%; height: 100%; }
 .home-hero__image { object-fit: cover; object-position: center; }
 .home-hero__content { position: relative; z-index: 2; display: flex; align-items: center; flex-direction: column; padding: 110px 24px 44px; text-align: center; }
@@ -141,16 +131,18 @@ a.explore-link:hover span { transform: translateX(4px); }
 .reveal.is-visible { opacity: 1; transform: translateY(0); }
 
 @media (max-width: 1100px) {
-  .home-hero__shape { width: clamp(110px, 18vw, 210px); height: clamp(110px, 18vw, 210px); }
-  .home-hero__shape--6 { display: none; }
+  .home-hero__shape { width: clamp(54px, 9vw, 105px); height: clamp(54px, 9vw, 105px); }
+  .home-hero__shape:nth-child(n + 13) { display: none; }
 }
 
 @media (max-width: 760px) {
   .home-page .home-header { height: 70px; }
   .home-hero__content { padding-top: 92px; }
   .home-hero p { letter-spacing: .22em; }
-  .home-hero__shape { width: clamp(92px, 24vw, 150px); height: clamp(92px, 24vw, 150px); }
-  .home-hero__shape--2, .home-hero__shape--5 { display: none; }
+  .home-hero__background { opacity: .22; }
+  .home-hero__background::after { background: radial-gradient(ellipse 46% 27% at center, var(--paper) 25%, transparent 100%); }
+  .home-hero__shape { width: clamp(48px, 16vw, 72px); height: clamp(48px, 16vw, 72px); }
+  .home-hero__shape:nth-child(n + 9) { display: none; }
   .home-editorial { width: min(100% - 32px, 1440px); padding-block: 88px; }
   .home-feature { margin-bottom: 120px; }
   .home-feature h2 { font-size: clamp(3.2rem, 18vw, 6rem); }
@@ -162,7 +154,7 @@ a.explore-link:hover span { transform: translateX(4px); }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal { opacity: 1; transform: none; }
-  .home-hero__shape { animation: none; }
+  .home-hero__shape { transition: none; }
 }
 
 /* Künstlerübersicht und Künstlerseiten */

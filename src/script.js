@@ -1313,6 +1313,86 @@ document.querySelectorAll(".home-page [data-page-image]").forEach((image) => {
 
 
 // ======================================================
+// Geometrische Bildkomposition im Home-Hero
+// ======================================================
+
+const heroBackground = document.querySelector(".home-hero__background");
+
+if (heroBackground) {
+  const heroShapes = [...heroBackground.querySelectorAll(".home-hero__shape")];
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const formNames = ["circle", "triangle", "square", "diamond", "ellipse"];
+  let formIndex = 0;
+  let formTimer;
+  let resizeTimer;
+
+  const polygonPoint = (vertices, progress) => {
+    const scaled = progress * vertices.length;
+    const startIndex = Math.floor(scaled) % vertices.length;
+    const endIndex = (startIndex + 1) % vertices.length;
+    const localProgress = scaled - Math.floor(scaled);
+    return {
+      x: vertices[startIndex].x + (vertices[endIndex].x - vertices[startIndex].x) * localProgress,
+      y: vertices[startIndex].y + (vertices[endIndex].y - vertices[startIndex].y) * localProgress
+    };
+  };
+
+  const positionFor = (form, progress, radiusX, radiusY) => {
+    const angle = progress * Math.PI * 2 - Math.PI / 2;
+    if (form === "circle") return { x: Math.cos(angle) * radiusX, y: Math.sin(angle) * radiusY };
+    if (form === "ellipse") return { x: Math.cos(angle) * radiusX, y: Math.sin(angle) * radiusY * .58 };
+
+    const polygons = {
+      triangle: [{ x: 0, y: -radiusY }, { x: radiusX, y: radiusY * .78 }, { x: -radiusX, y: radiusY * .78 }],
+      square: [{ x: -radiusX, y: -radiusY }, { x: radiusX, y: -radiusY }, { x: radiusX, y: radiusY }, { x: -radiusX, y: radiusY }],
+      diamond: [{ x: 0, y: -radiusY }, { x: radiusX, y: 0 }, { x: 0, y: radiusY }, { x: -radiusX, y: 0 }]
+    };
+    return polygonPoint(polygons[form], progress);
+  };
+
+  const arrangeHeroShapes = () => {
+    const width = heroBackground.clientWidth;
+    const height = heroBackground.clientHeight;
+    const isMobile = width <= 760;
+    const isTablet = width <= 1100;
+    const visibleCount = isMobile ? 8 : (isTablet ? 12 : heroShapes.length);
+    const radiusX = width * (isMobile ? .39 : (isTablet ? .39 : .41));
+    const radiusY = height * (isMobile ? .35 : (isTablet ? .38 : .4));
+    const form = reduceMotion.matches ? "circle" : formNames[formIndex];
+
+    heroShapes.slice(0, visibleCount).forEach((shape, index) => {
+      const point = positionFor(form, index / visibleCount, radiusX, radiusY);
+      shape.style.setProperty("--x", `${point.x.toFixed(1)}px`);
+      shape.style.setProperty("--y", `${point.y.toFixed(1)}px`);
+      shape.style.setProperty("--rotation", `${(index * 360 / visibleCount).toFixed(1)}deg`);
+    });
+    heroBackground.dataset.form = form;
+  };
+
+  const startHeroMorph = () => {
+    window.clearInterval(formTimer);
+    if (!reduceMotion.matches) {
+      formTimer = window.setInterval(() => {
+        formIndex = (formIndex + 1) % formNames.length;
+        arrangeHeroShapes();
+      }, 5000);
+    }
+  };
+
+  arrangeHeroShapes();
+  startHeroMorph();
+  reduceMotion.addEventListener("change", () => {
+    arrangeHeroShapes();
+    startHeroMorph();
+  });
+  window.addEventListener("resize", () => {
+    window.clearTimeout(resizeTimer);
+    resizeTimer = window.setTimeout(arrangeHeroShapes, 120);
+  }, { passive: true });
+}
+
+
+// ======================================================
 // Dezente Einblendungen auf der Startseite
 // ======================================================
 
