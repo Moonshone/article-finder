@@ -32,7 +32,7 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/style.css">
 </head>
-<body>
+<body class="transparent-nav-page">
   <div class="page-shell">
     <header class="site-header">
       <nav class="main-nav" aria-label="Hauptnavigation">
