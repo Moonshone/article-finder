@@ -28,18 +28,22 @@ function sanitize_story_html(string $html): string
     }
     $document = new DOMDocument('1.0', 'UTF-8');
     $previous = libxml_use_internal_errors(true);
-    $document->loadHTML('<?xml encoding="utf-8" ?><div id="story-root">' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    $loaded = $document->loadHTML('<?xml encoding="utf-8" ?><div id="story-root">' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD | LIBXML_NONET);
     libxml_clear_errors();
     libxml_use_internal_errors($previous);
     $allowed = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'span'];
     $fontClasses = array_map(static fn (int $size): string => 'story-font-' . $size, story_font_sizes());
     $alignClasses = ['story-align-left', 'story-align-center', 'story-align-right'];
-    $root = $document->getElementById('story-root');
+    $root = $loaded ? $document->getElementById('story-root') : null;
     if (!$root) return '';
     $walk = function (DOMNode $node) use (&$walk, $allowed, $fontClasses, $alignClasses): void {
         foreach (iterator_to_array($node->childNodes) as $child) {
             if ($child instanceof DOMElement) {
                 $tag = strtolower($child->tagName);
+                if (in_array($tag, ['script', 'style', 'iframe', 'object', 'embed', 'svg', 'math', 'template'], true)) {
+                    $node->removeChild($child);
+                    continue;
+                }
                 $walk($child);
                 if (!in_array($tag, $allowed, true)) {
                     while ($child->firstChild) $node->insertBefore($child->firstChild, $child);
@@ -104,14 +108,37 @@ function validate_story_input(array $input): array
 function upload_story_image(array $file): ?string
 {
     if (($file['error'] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) return null;
-    if (($file['error'] ?? null) !== UPLOAD_ERR_OK || !isset($file['tmp_name'], $file['size']) || !is_uploaded_file($file['tmp_name'])) throw new RuntimeException('Bild-Upload fehlgeschlagen.');
-    if ((int) $file['size'] > 5 * 1024 * 1024) throw new RuntimeException('Das Bild darf höchstens 5 MB groß sein.');
+    if (($file['error'] ?? null) !== UPLOAD_ERR_OK || !isset($file['tmp_name'], $file['size'], $file['name']) || !is_string($file['tmp_name']) || !is_int($file['size']) || !is_string($file['name']) || !is_uploaded_file($file['tmp_name'])) throw new RuntimeException('Bild-Upload fehlgeschlagen.');
+    if ($file['size'] <= 0 || $file['size'] > 5 * 1024 * 1024) throw new RuntimeException('Das Bild darf höchstens 5 MB groß sein.');
+    $extension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'webp'], true)) throw new RuntimeException('Nur gültige JPEG-, PNG- oder WebP-Bilder sind erlaubt.');
     $mime = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
     $types = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    if (!isset($types[$mime]) || @getimagesize($file['tmp_name']) === false) throw new RuntimeException('Nur gültige JPEG-, PNG- oder WebP-Bilder sind erlaubt.');
+    $imageInfo = @getimagesize($file['tmp_name']);
+    if (!isset($types[$mime]) || !is_array($imageInfo) || ($imageInfo['mime'] ?? '') !== $mime) throw new RuntimeException('Nur gültige JPEG-, PNG- oder WebP-Bilder sind erlaubt.');
+    $width = (int) ($imageInfo[0] ?? 0);
+    $height = (int) ($imageInfo[1] ?? 0);
+    if ($width < 1 || $height < 1 || $width > 10000 || $height > 10000 || $width * $height > 25000000) throw new RuntimeException('Die Bildabmessungen sind ungültig oder zu groß.');
+    $imageBytes = @file_get_contents($file['tmp_name']);
+    $decodedImage = is_string($imageBytes) && function_exists('imagecreatefromstring') ? @imagecreatefromstring($imageBytes) : false;
+    if (!$decodedImage instanceof GdImage) throw new RuntimeException('Das Bild konnte nicht sicher verarbeitet werden.');
     if (!is_dir(NEMA_UPLOAD_DIR) && !mkdir(NEMA_UPLOAD_DIR, 0750, true) && !is_dir(NEMA_UPLOAD_DIR)) throw new RuntimeException('Upload-Verzeichnis nicht verfügbar.');
     $name = bin2hex(random_bytes(24)) . '.' . $types[$mime];
-    if (!move_uploaded_file($file['tmp_name'], NEMA_UPLOAD_DIR . '/' . $name)) throw new RuntimeException('Bild konnte nicht gespeichert werden.');
+    $path = NEMA_UPLOAD_DIR . '/' . $name;
+    // Re-encoding strips metadata and any bytes appended to an otherwise valid
+    // image (for example image/script polyglots).
+    $written = match ($mime) {
+        'image/jpeg' => imagejpeg($decodedImage, $path, 90),
+        'image/png' => imagepng($decodedImage, $path, 6),
+        'image/webp' => imagewebp($decodedImage, $path, 90),
+        default => false,
+    };
+    imagedestroy($decodedImage);
+    if (!$written) {
+        @unlink($path);
+        throw new RuntimeException('Bild konnte nicht gespeichert werden.');
+    }
+    @chmod($path, 0640);
     return NEMA_UPLOAD_URL . $name;
 }
 

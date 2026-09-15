@@ -26,7 +26,8 @@ CREATE TABLE IF NOT EXISTS login_attempts (
     id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
     identity_hash CHAR(64) NOT NULL,
     attempted_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    INDEX attempts_window (identity_hash, attempted_at)
+    INDEX attempts_window (identity_hash, attempted_at),
+    INDEX attempts_cleanup (attempted_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS admin_audit_log (
@@ -39,4 +40,3 @@ CREATE TABLE IF NOT EXISTS admin_audit_log (
     INDEX audit_created (created_at),
     CONSTRAINT audit_user FOREIGN KEY (admin_user_id) REFERENCES admin_users(id) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-

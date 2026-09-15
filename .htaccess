@@ -3,8 +3,12 @@ RewriteEngine On
 RewriteRule ^sites/kunst\.html$ sites/kunst.php [END]
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https
-RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=308,L]
+RewriteRule ^ https://nema.one%{REQUEST_URI} [R=308,L]
 
-<FilesMatch "^(?:\.env|composer\.(?:json|lock)|.*\.(?:sql|log|ini))$">
+# Application internals and maintenance tools are never web endpoints.
+RewriteRule ^(?:app|bin|database|tests)(?:/|$) - [F,L]
+RewriteRule ^test(?:-|/|$).*\.php$ - [F,L]
+
+<FilesMatch "^(?:\.env(?:\..*)?|composer\.(?:json|lock)|.*\.(?:sql|log|ini|bak|old|orig|swp))$">
     Require all denied
 </FilesMatch>
