@@ -17,6 +17,9 @@ button { cursor: pointer; }
 .transparent-nav-page .site-header { color: var(--ink); background: transparent; }
 .transparent-nav-page .nav-link { color: var(--ink); }
 .transparent-nav-page .nav-link:hover, .transparent-nav-page .nav-link:focus-visible, .transparent-nav-page .nav-link.active { border-bottom-color: var(--ink); color: var(--ink); }
+.artist-detail-page .site-header { color: var(--ink); background: transparent; }
+.artist-detail-page .nav-link { color: var(--ink); }
+.artist-detail-page .nav-link:hover, .artist-detail-page .nav-link:focus-visible, .artist-detail-page .nav-link.active { border-bottom-color: var(--ink); color: var(--ink); }
 .brand { display: flex; align-items: center; gap: 11px; color: var(--ink); font-size: 18px; font-weight: 700; text-decoration: none; }
 .brand-mark { display: grid; width: 36px; height: 36px; place-items: center; border-radius: 11px; color: white; background: var(--green); box-shadow: 0 5px 12px #176b4633; }
 .brand-mark svg, .input-wrap svg, .primary-button svg { width: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
