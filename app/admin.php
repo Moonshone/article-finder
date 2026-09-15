@@ -39,6 +39,27 @@ function admin_session_is_valid(): bool
         && $now - (int) $_SESSION['created_at'] <= ABSOLUTE_TIMEOUT;
 }
 
+/**
+ * Validate the existing admin session for an otherwise public request.
+ *
+ * Visitors without an admin cookie do not get a new session. This helper does
+ * not protect a route; admin pages must continue to use boot_admin().
+ */
+function public_request_has_valid_admin_session(): bool
+{
+    if (!isset($_COOKIE['NEMA_ADMIN']) || !is_string($_COOKIE['NEMA_ADMIN'])) {
+        return false;
+    }
+
+    start_secure_session();
+    if (!admin_session_is_valid()) {
+        return false;
+    }
+
+    $_SESSION['last_seen'] = time();
+    return true;
+}
+
 function destroy_admin_session(): void
 {
     $_SESSION = [];
