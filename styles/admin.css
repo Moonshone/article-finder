@@ -1,5 +1,5 @@
 .admin-page { min-height: 100vh; background: var(--background); }
-.admin-header { display: flex; min-height: 68px; align-items: center; justify-content: space-between; padding: 12px clamp(18px, 4vw, 54px); color: #fff; background: var(--ink); }
+.admin-header { display: flex; min-height: 52px; align-items: center; justify-content: space-between; padding: 8px clamp(18px, 4vw, 54px); border-bottom: 1px solid var(--line); color: var(--ink); background: transparent; }
 .admin-header a { color: inherit; font-weight: 700; text-decoration: none; }
 .admin-header form, .actions form { margin: 0; }
 .admin-shell { width: min(100% - 32px, 1180px); margin: auto; padding: 52px 0 80px; }
@@ -27,3 +27,18 @@
 .editor-preview { width: min(100%, 360px); max-height: 240px; margin-bottom: 20px; object-fit: contain; }
 @media (max-width: 620px) { .admin-title { align-items: stretch; flex-direction: column; } .admin-title .admin-button { width: 100%; } .actions { align-items: flex-start; flex-direction: column; } }
 
+
+.editor-field { margin-bottom: 20px; }
+.editor-label { display: grid; gap: 8px; margin-bottom: 8px; font-weight: 600; }
+.editor-toolbar { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px; border: 1px solid #cbd6d0; border-bottom: 0; border-radius: 9px 9px 0 0; background: var(--background); }
+.editor-toolbar button, .editor-toolbar select { width: auto; min-height: 38px; padding: 7px 10px; border: 1px solid #cbd6d0; border-radius: 6px; background: #fff; color: var(--ink); font: inherit; }
+.rich-editor { min-height: 360px; padding: 12px; overflow-wrap: anywhere; border: 1px solid #cbd6d0; border-radius: 0 0 9px 9px; background: #fff; line-height: 1.6; }
+.rich-editor:focus { outline: 2px solid var(--green); outline-offset: 1px; }
+.editor-source { position: absolute; width: 1px !important; height: 1px !important; min-height: 0 !important; padding: 0 !important; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.story-text-small { font-size: .85em; }
+.story-text-normal { font-size: 1em; }
+.story-text-large { font-size: 1.25em; }
+.story-text-xlarge { font-size: 1.55em; }
+.story-align-left { text-align: left; }
+.story-align-center { text-align: center; }
+.story-align-right { text-align: right; }

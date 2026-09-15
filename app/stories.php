@@ -31,10 +31,14 @@ function sanitize_story_html(string $html): string
     $document->loadHTML('<?xml encoding="utf-8" ?><div id="story-root">' . $html . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     libxml_clear_errors();
     libxml_use_internal_errors($previous);
-    $allowed = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li'];
+    $allowed = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'span'];
+    $allowedClasses = [
+        'story-text-small', 'story-text-normal', 'story-text-large', 'story-text-xlarge',
+        'story-align-left', 'story-align-center', 'story-align-right',
+    ];
     $root = $document->getElementById('story-root');
     if (!$root) return '';
-    $walk = function (DOMNode $node) use (&$walk, $allowed): void {
+    $walk = function (DOMNode $node) use (&$walk, $allowed, $allowedClasses): void {
         foreach (iterator_to_array($node->childNodes) as $child) {
             if ($child instanceof DOMElement) {
                 $tag = strtolower($child->tagName);
@@ -44,8 +48,16 @@ function sanitize_story_html(string $html): string
                     $node->removeChild($child);
                     continue;
                 }
-                $originalHref = $tag === 'a' ? $child->getAttribute('href') : '';
+                $originalHref = $tag === 'a' ? trim($child->getAttribute('href')) : '';
+                $classAllowlist = $tag === 'span'
+                    ? array_slice($allowedClasses, 0, 4)
+                    : (in_array($tag, ['p', 'li'], true) ? array_slice($allowedClasses, 4) : []);
+                $originalClasses = $classAllowlist
+                    ? (preg_split('/\s+/', trim($child->getAttribute('class'))) ?: [])
+                    : [];
                 foreach (iterator_to_array($child->attributes) as $attribute) $child->removeAttribute($attribute->name);
+                $safeClasses = array_values(array_unique(array_intersect($originalClasses, $classAllowlist)));
+                if ($safeClasses) $child->setAttribute('class', implode(' ', $safeClasses));
                 if ($tag === 'a') {
                     $href = $originalHref;
                     if (preg_match('#\Ahttps?://#i', $href) && filter_var($href, FILTER_VALIDATE_URL)) {

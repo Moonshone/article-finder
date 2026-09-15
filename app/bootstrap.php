@@ -105,7 +105,8 @@ function start_secure_session(): void
     session_name('NEMA_ADMIN');
     session_set_cookie_params([
         'lifetime' => 0,
-        'path' => '/admin',
+        // Public stories may validate an existing admin session to show admin links.
+        'path' => '/',
         'secure' => true,
         'httponly' => true,
         'samesite' => 'Strict',
