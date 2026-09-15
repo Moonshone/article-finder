@@ -35,10 +35,27 @@
 .rich-editor { min-height: 360px; padding: 12px; overflow-wrap: anywhere; border: 1px solid #cbd6d0; border-radius: 0 0 9px 9px; background: #fff; line-height: 1.6; }
 .rich-editor:focus { outline: 2px solid var(--green); outline-offset: 1px; }
 .editor-source { position: absolute; width: 1px !important; height: 1px !important; min-height: 0 !important; padding: 0 !important; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
-.story-text-small { font-size: .85em; }
-.story-text-normal { font-size: 1em; }
-.story-text-large { font-size: 1.25em; }
-.story-text-xlarge { font-size: 1.55em; }
 .story-align-left { text-align: left; }
 .story-align-center { text-align: center; }
 .story-align-right { text-align: right; }
+
+.story-font-12 { font-size: 12px; }
+.story-font-14 { font-size: 14px; }
+.story-font-16 { font-size: 16px; }
+.story-font-18 { font-size: 18px; }
+.story-font-20 { font-size: 20px; }
+.story-font-22 { font-size: 22px; }
+.story-font-24 { font-size: 24px; }
+.story-font-26 { font-size: 26px; }
+.story-font-28 { font-size: 28px; }
+.story-font-30 { font-size: 30px; }
+.story-font-32 { font-size: 32px; }
+.story-font-36 { font-size: 36px; }
+.story-font-40 { font-size: 40px; }
+.story-font-44 { font-size: 44px; }
+.story-font-48 { font-size: 48px; }
+
+.editor-field--title .rich-editor { min-height: 58px; }
+.editor-field--excerpt .rich-editor { min-height: 110px; }
+.editor-field--content .rich-editor { min-height: 360px; }
+.editor-toolbar select { max-width: 110px; }
