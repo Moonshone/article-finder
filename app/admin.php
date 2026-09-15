@@ -30,13 +30,30 @@ function admin_session_is_valid(): bool
 {
     if (session_status() !== PHP_SESSION_ACTIVE) return false;
     $now = time();
-    return isset($_SESSION['admin_id'], $_SESSION['admin_role'], $_SESSION['created_at'], $_SESSION['last_seen'])
+    $structurallyValid = isset($_SESSION['admin_id'], $_SESSION['admin_role'], $_SESSION['created_at'], $_SESSION['last_seen'])
         && is_int($_SESSION['admin_id'])
+        && is_int($_SESSION['created_at'])
+        && is_int($_SESSION['last_seen'])
         && $_SESSION['admin_role'] === 'admin'
         && isset($_SESSION['user_agent'])
+        && is_string($_SESSION['user_agent'])
         && hash_equals($_SESSION['user_agent'], hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? ''))
-        && $now - (int) $_SESSION['last_seen'] <= IDLE_TIMEOUT
-        && $now - (int) $_SESSION['created_at'] <= ABSOLUTE_TIMEOUT;
+        && $_SESSION['last_seen'] <= $now
+        && $_SESSION['created_at'] <= $now
+        && $now - $_SESSION['last_seen'] <= IDLE_TIMEOUT
+        && $now - $_SESSION['created_at'] <= ABSOLUTE_TIMEOUT;
+    if (!$structurallyValid) return false;
+
+    // A role change or account deactivation must revoke an existing session too.
+    try {
+        $statement = database()->prepare('SELECT role, is_active FROM admin_users WHERE id = :id LIMIT 1');
+        $statement->execute(['id' => $_SESSION['admin_id']]);
+        $user = $statement->fetch();
+        return is_array($user) && $user['role'] === 'admin' && (int) $user['is_active'] === 1;
+    } catch (Throwable $exception) {
+        error_log('Admin session validation failed: ' . $exception->getMessage());
+        return false;
+    }
 }
 
 /**
@@ -65,7 +82,14 @@ function destroy_admin_session(): void
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $params = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
+        setcookie(session_name(), '', [
+            'expires' => time() - 42000,
+            'path' => $params['path'],
+            'domain' => $params['domain'],
+            'secure' => $params['secure'],
+            'httponly' => $params['httponly'],
+            'samesite' => $params['samesite'] ?? 'Strict',
+        ]);
     }
     if (session_status() === PHP_SESSION_ACTIVE) {
         session_destroy();

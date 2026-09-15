@@ -8,6 +8,9 @@ const NEMA_UPLOAD_URL = '/uploads/stories/';
 
 ini_set('display_errors', '0');
 ini_set('log_errors', '1');
+// Also remove the runtime version header when expose_php cannot be changed at
+// script level (common on shared hosting).
+header_remove('X-Powered-By');
 
 function database(): PDO
 {
@@ -62,6 +65,7 @@ function security_headers(bool $admin = false): void
 {
     header("Content-Security-Policy: default-src 'self'; img-src 'self' https:; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'self'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; upgrade-insecure-requests");
     header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: DENY');
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('Permissions-Policy: camera=(), microphone=(), geolocation=()');
     if ($admin) {
@@ -86,11 +90,16 @@ function require_https(): void
     if (request_is_https()) {
         return;
     }
-    $host = $_SERVER['HTTP_HOST'] ?? 'nema.one';
-    if (!preg_match('/\A[a-z0-9.-]+(?::\d+)?\z/i', $host)) {
+    // Never use the request's Host header to construct a security redirect.
+    $host = trim(getenv('NEMA_CANONICAL_HOST') ?: 'nema.one');
+    if (!preg_match('/\A(?:[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?)(?::\d{1,5})?\z/i', $host)) {
         $host = 'nema.one';
     }
-    header('Location: https://' . $host . ($_SERVER['REQUEST_URI'] ?? '/admin/'), true, 308);
+    $uri = $_SERVER['REQUEST_URI'] ?? '/admin/';
+    if (!is_string($uri) || !str_starts_with($uri, '/') || str_starts_with($uri, '//') || preg_match('/[\r\n]/', $uri)) {
+        $uri = '/admin/';
+    }
+    header('Location: https://' . $host . $uri, true, 308);
     exit;
 }
 
@@ -102,6 +111,8 @@ function start_secure_session(): void
     ini_set('session.use_only_cookies', '1');
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_trans_sid', '0');
+    ini_set('session.sid_length', '48');
+    ini_set('session.sid_bits_per_character', '6');
     session_name('NEMA_ADMIN');
     session_set_cookie_params([
         'lifetime' => 0,
@@ -125,7 +136,7 @@ function csrf_token(): string
 function verify_csrf(): void
 {
     $submitted = $_POST['csrf'] ?? '';
-    if (!is_string($submitted) || !isset($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $submitted)) {
+    if (!is_string($submitted) || !isset($_SESSION['csrf']) || !is_string($_SESSION['csrf']) || !hash_equals($_SESSION['csrf'], $submitted)) {
         http_response_code(403);
         exit('Die Anfrage konnte nicht verifiziert werden.');
     }

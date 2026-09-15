@@ -4,7 +4,7 @@ declare(strict_types=1);
 require_once __DIR__ . '/../app/admin.php';
 boot_admin(false);
 if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'POST'], true)) { header('Allow: GET, POST'); http_response_code(405); exit('Methode nicht erlaubt.'); }
-if (isset($_SESSION['admin_id'], $_SESSION['admin_role']) && $_SESSION['admin_role'] === 'admin') {
+if (admin_session_is_valid()) {
     header('Location: /admin/'); exit;
 }
 $error = '';
@@ -17,6 +17,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     $ipIdentity = hash('sha256', 'ip|' . $ip);
     try {
         $pdo = database();
+        // Bound table growth without making cleanup a prerequisite for login.
+        if (random_int(1, 100) === 1) {
+            $pdo->exec('DELETE FROM login_attempts WHERE attempted_at < (UTC_TIMESTAMP() - INTERVAL 24 HOUR)');
+        }
         $count = $pdo->prepare('SELECT identity_hash, COUNT(*) AS failures FROM login_attempts WHERE identity_hash IN (:identity, :ip_identity) AND attempted_at >= (UTC_TIMESTAMP() - INTERVAL 15 MINUTE) GROUP BY identity_hash');
         $count->execute(['identity' => $identity, 'ip_identity' => $ipIdentity]);
         $limited = false;
@@ -31,6 +35,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $valid = !$limited && password_verify($password, is_array($user) ? $user['password_hash'] : $dummy)
             && is_array($user) && (int) $user['is_active'] === 1 && $user['role'] === 'admin';
         if ($valid) {
+            $passwordAlgorithm = defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_DEFAULT;
+            if (password_needs_rehash($user['password_hash'], $passwordAlgorithm)) {
+                $rehash = $pdo->prepare('UPDATE admin_users SET password_hash = :hash WHERE id = :id');
+                $rehash->execute(['hash' => password_hash($password, $passwordAlgorithm), 'id' => $user['id']]);
+            }
             $pdo->prepare('DELETE FROM login_attempts WHERE identity_hash IN (:identity, :ip_identity)')->execute(['identity' => $identity, 'ip_identity' => $ipIdentity]);
             session_regenerate_id(true);
             $_SESSION = ['admin_id' => (int) $user['id'], 'admin_role' => 'admin', 'created_at' => time(), 'last_seen' => time(), 'user_agent' => hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? '')];

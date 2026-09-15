@@ -6,10 +6,10 @@
 2. Wie die vorhandenen APIs wird `../config.php` außerhalb des Webroots geladen. Die Datei muss `$pdo` als PDO-Verbindung bereitstellen. Zugangsdaten werden nicht im Repository gespeichert.
 3. Den ersten Admin ausschließlich per CLI erstellen:
    `NEMA_ADMIN_USERNAME='admin' NEMA_ADMIN_PASSWORD='ein-langes-zufaelliges-passwort' php bin/create-admin.php`
-4. Apache muss `.htaccess` erlauben (`AllowOverride FileInfo Options AuthConfig`). Bei einem TLS-Terminierungsproxy dessen feste IP über `NEMA_TRUSTED_PROXIES` (kommagetrennt) setzen; niemals ein ganzes unkontrolliertes Netz eintragen.
+4. Apache muss `.htaccess` erlauben (`AllowOverride FileInfo Options AuthConfig`). Bei einem TLS-Terminierungsproxy dessen feste IP über `NEMA_TRUSTED_PROXIES` (kommagetrennt) setzen; niemals ein ganzes unkontrolliertes Netz eintragen. Falls der Admin unter einem anderen Host als `nema.one` läuft, muss zusätzlich `NEMA_CANONICAL_HOST` auf diesen festen Host gesetzt werden.
 5. Der Webserver-Prozess benötigt Schreibrechte ausschließlich auf `uploads/stories/`. PHP-Ausführung ist dort über `.htaccess` deaktiviert; für nginx ist die äquivalente Deny-/No-script-Regel in der Serverkonfiguration zu setzen.
 
-Der Admin ist unter `/admin/`, die öffentliche Übersicht unter `/stories/` erreichbar. In Produktion sollten PHP-Fehler in ein nicht öffentliches Systemlog geschrieben, TLS/HSTS am Webserver verwaltet und Audit-/Login-Datensätze nach der betrieblichen Aufbewahrungsrichtlinie regelmäßig bereinigt werden.
+Der Admin ist unter `/admin/`, die öffentliche Übersicht unter `/stories/` erreichbar. PHP benötigt dafür PDO MySQL, DOM, Fileinfo, GD und mbstring. In Produktion müssen PHP-Fehler in ein nicht öffentliches Systemlog geschrieben und TLS/HSTS am Webserver verwaltet werden. Alte Login-Versuche werden anmeldebegleitend bereinigt; Audit-Datensätze sollten nach der betrieblichen Aufbewahrungsrichtlinie regelmäßig bereinigt werden.
 
 ## Job-Finder mit n8n verbinden
 

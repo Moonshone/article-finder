@@ -18,5 +18,10 @@ try {
     $status = $action === 'publish' ? 'published' : 'draft';
     $statement = $pdo->prepare('UPDATE stories SET status=:status, published_at=CASE WHEN :date_status = \'published\' THEN COALESCE(published_at, UTC_TIMESTAMP()) ELSE NULL END WHERE id=:id');
     $statement->execute(['status' => $status, 'date_status' => $status, 'id' => $id]);
+    if ($statement->rowCount() === 0) {
+        $exists = $pdo->prepare('SELECT 1 FROM stories WHERE id = :id');
+        $exists->execute(['id' => $id]);
+        if (!$exists->fetchColumn()) { http_response_code(404); exit('Story nicht gefunden.'); }
+    }
     audit('story_' . ($action === 'publish' ? 'published' : 'unpublished'), $_SESSION['admin_id'], ['story_id' => $id]); redirect_with_message($action === 'publish' ? 'Story wurde veröffentlicht.' : 'Story wurde zurückgezogen.');
 } catch (Throwable $exception) { if (isset($pdo) && $pdo->inTransaction()) $pdo->rollBack(); error_log('Story action failed: ' . $exception->getMessage()); redirect_with_message('Aktion konnte nicht ausgeführt werden.'); }

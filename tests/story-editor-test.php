@@ -14,13 +14,14 @@ function assert_story(bool $condition, string $message): void
 $unsafe = '<p class="story-align-center arbitrary" style="color:red" onclick="alert(1)">'
     . '<span class="story-font-24 evil" style="font-size:1000px"><strong>Fett</strong></span>'
     . '<em>Kursiv</em><a href="javascript:alert(1)" onerror="alert(1)">Link</a>'
-    . '<script>alert(1)</script><iframe src="https://evil.test"></iframe></p>';
+    . '<script>dangerous-script-text</script><iframe src="https://evil.test">dangerous-frame-text</iframe>'
+    . '<svg><a href="javascript:alert(1)">dangerous-svg-text</a></svg></p>';
 $safe = sanitize_story_html($unsafe);
 
 assert_story(str_contains($safe, 'class="story-align-center"'), 'whitelisted alignment is retained');
 assert_story(str_contains($safe, 'class="story-font-24"'), 'whitelisted pixel size is retained');
 assert_story(str_contains($safe, '<strong>Fett</strong>') && str_contains($safe, '<em>Kursiv</em>'), 'inline formatting is retained');
-foreach (['arbitrary', 'evil', 'style=', 'onclick=', 'onerror=', 'javascript:', '<script', '<iframe'] as $blocked) {
+foreach (['arbitrary', 'evil', 'style=', 'onclick=', 'onerror=', 'javascript:', '<script', '<iframe', '<svg', 'dangerous-script-text', 'dangerous-frame-text', 'dangerous-svg-text'] as $blocked) {
     assert_story(!str_contains($safe, $blocked), "unsafe value was retained: {$blocked}");
 }
 
