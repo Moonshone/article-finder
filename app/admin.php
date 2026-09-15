@@ -16,20 +16,27 @@ function boot_admin(bool $authenticationRequired = true): void
     if (!$authenticationRequired) {
         return;
     }
+    $valid = admin_session_is_valid();
+    if (!$valid) {
+        destroy_admin_session();
+        header('Location: /admin/login.php');
+        exit;
+    }
+    $_SESSION['last_seen'] = time();
+}
+
+/** Validate an existing admin session without granting or replacing authentication. */
+function admin_session_is_valid(): bool
+{
+    if (session_status() !== PHP_SESSION_ACTIVE) return false;
     $now = time();
-    $valid = isset($_SESSION['admin_id'], $_SESSION['admin_role'], $_SESSION['created_at'], $_SESSION['last_seen'])
+    return isset($_SESSION['admin_id'], $_SESSION['admin_role'], $_SESSION['created_at'], $_SESSION['last_seen'])
         && is_int($_SESSION['admin_id'])
         && $_SESSION['admin_role'] === 'admin'
         && isset($_SESSION['user_agent'])
         && hash_equals($_SESSION['user_agent'], hash('sha256', $_SERVER['HTTP_USER_AGENT'] ?? ''))
         && $now - (int) $_SESSION['last_seen'] <= IDLE_TIMEOUT
         && $now - (int) $_SESSION['created_at'] <= ABSOLUTE_TIMEOUT;
-    if (!$valid) {
-        destroy_admin_session();
-        header('Location: /admin/login.php');
-        exit;
-    }
-    $_SESSION['last_seen'] = $now;
 }
 
 function destroy_admin_session(): void

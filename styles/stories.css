@@ -18,3 +18,12 @@
 .story-content a { color: var(--green); }
 @media (max-width: 680px) { .stories-shell { width: min(100% - 24px, 1280px); } .story-grid { grid-template-columns: 1fr; } .stories-intro h1 { font-size: clamp(3.5rem, 20vw, 7rem); } }
 
+.story-text-small { font-size: .85em; }
+.story-text-normal { font-size: 1em; }
+.story-text-large { font-size: 1.25em; }
+.story-text-xlarge { font-size: 1.55em; }
+.story-align-left { text-align: left; }
+.story-align-center { text-align: center; }
+.story-align-right { text-align: right; }
+.story-admin { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 24px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); font-size: .85rem; }
+.story-admin a { color: var(--ink); }
