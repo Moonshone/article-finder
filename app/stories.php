@@ -32,13 +32,11 @@ function sanitize_story_html(string $html): string
     libxml_clear_errors();
     libxml_use_internal_errors($previous);
     $allowed = ['p', 'br', 'strong', 'em', 'a', 'ul', 'ol', 'li', 'span'];
-    $allowedClasses = [
-        'story-text-small', 'story-text-normal', 'story-text-large', 'story-text-xlarge',
-        'story-align-left', 'story-align-center', 'story-align-right',
-    ];
+    $fontClasses = array_map(static fn (int $size): string => 'story-font-' . $size, story_font_sizes());
+    $alignClasses = ['story-align-left', 'story-align-center', 'story-align-right'];
     $root = $document->getElementById('story-root');
     if (!$root) return '';
-    $walk = function (DOMNode $node) use (&$walk, $allowed, $allowedClasses): void {
+    $walk = function (DOMNode $node) use (&$walk, $allowed, $fontClasses, $alignClasses): void {
         foreach (iterator_to_array($node->childNodes) as $child) {
             if ($child instanceof DOMElement) {
                 $tag = strtolower($child->tagName);
@@ -50,8 +48,8 @@ function sanitize_story_html(string $html): string
                 }
                 $originalHref = $tag === 'a' ? trim($child->getAttribute('href')) : '';
                 $classAllowlist = $tag === 'span'
-                    ? array_slice($allowedClasses, 0, 4)
-                    : (in_array($tag, ['p', 'li'], true) ? array_slice($allowedClasses, 4) : []);
+                    ? $fontClasses
+                    : (in_array($tag, ['p', 'li'], true) ? $alignClasses : []);
                 $originalClasses = $classAllowlist
                     ? (preg_split('/\s+/', trim($child->getAttribute('class'))) ?: [])
                     : [];
@@ -74,18 +72,33 @@ function sanitize_story_html(string $html): string
     return trim($result);
 }
 
+/** @return list<int> */
+function story_font_sizes(): array
+{
+    return [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 44, 48];
+}
+
+function story_plain_text(string $html): string
+{
+    $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    return trim(preg_replace('/\s+/u', ' ', $text) ?? '');
+}
+
 function validate_story_input(array $input): array
 {
     $title = trim(is_string($input['title'] ?? null) ? $input['title'] : '');
     $excerpt = trim(is_string($input['excerpt'] ?? null) ? $input['excerpt'] : '');
     $content = is_string($input['content'] ?? null) ? trim($input['content']) : '';
     $status = is_string($input['status'] ?? null) ? $input['status'] : '';
+    $safeTitle = sanitize_story_html($title);
+    $safeExcerpt = sanitize_story_html($excerpt);
+    $safeContent = sanitize_story_html($content);
     $errors = [];
-    if ($title === '' || mb_strlen($title) > 200) $errors[] = 'Der Titel muss zwischen 1 und 200 Zeichen lang sein.';
-    if (mb_strlen($excerpt) > 500) $errors[] = 'Die Kurzbeschreibung darf höchstens 500 Zeichen lang sein.';
-    if ($content === '' || mb_strlen($content) > 100000) $errors[] = 'Der Inhalt muss zwischen 1 und 100.000 Zeichen lang sein.';
+    if (story_plain_text($title) === '' || mb_strlen(story_plain_text($title)) > 200 || mb_strlen($safeTitle) > 200) $errors[] = 'Der Titel einschließlich Formatierung darf höchstens 200 Zeichen lang sein.';
+    if (mb_strlen(story_plain_text($excerpt)) > 500 || mb_strlen($safeExcerpt) > 500) $errors[] = 'Die Kurzbeschreibung einschließlich Formatierung darf höchstens 500 Zeichen lang sein.';
+    if (story_plain_text($content) === '' || mb_strlen($content) > 100000) $errors[] = 'Der Inhalt muss zwischen 1 und 100.000 Zeichen lang sein.';
     if (!in_array($status, ['draft', 'published'], true)) $errors[] = 'Der Status ist ungültig.';
-    return [$errors, ['title' => $title, 'excerpt' => $excerpt, 'content' => sanitize_story_html($content), 'status' => $status]];
+    return [$errors, ['title' => $safeTitle, 'excerpt' => $safeExcerpt, 'content' => $safeContent, 'status' => $status]];
 }
 
 function upload_story_image(array $file): ?string

@@ -6,14 +6,22 @@ document.querySelectorAll(".delete-form").forEach((form) => {
   });
 });
 
-const richEditor = document.querySelector(".rich-editor");
-const editorSource = document.querySelector(".editor-source");
+const allowedSizeClasses = [12, 14, 16, 18, 20, 22, 24, 26, 28, 30, 32, 36, 40, 44, 48].map((size) => `story-font-${size}`);
+const allowedAlignClasses = ["story-align-left", "story-align-center", "story-align-right"];
 
-if (richEditor && editorSource) {
+document.querySelectorAll("[data-rich-editor]").forEach((field) => {
+  const richEditor = field.querySelector(".rich-editor");
+  const editorSource = field.querySelector(".editor-source");
   let savedRange = null;
-  const allowedSizeClasses = ["story-text-small", "story-text-normal", "story-text-large", "story-text-xlarge"];
-  const allowedAlignClasses = ["story-align-left", "story-align-center", "story-align-right"];
-
+  const syncSource = () => {
+    const clone = richEditor.cloneNode(true);
+    clone.querySelectorAll("div").forEach((element) => {
+      const paragraph = document.createElement("p");
+      while (element.firstChild) paragraph.append(element.firstChild);
+      element.replaceWith(paragraph);
+    });
+    editorSource.value = clone.innerHTML;
+  };
   const rememberSelection = () => {
     const selection = window.getSelection();
     if (selection.rangeCount && richEditor.contains(selection.anchorNode)) savedRange = selection.getRangeAt(0).cloneRange();
@@ -30,50 +38,40 @@ if (richEditor && editorSource) {
     if (!range || range.collapsed) return;
     const wrapper = document.createElement(tagName);
     if (className) wrapper.className = className;
-    try {
-      range.surroundContents(wrapper);
-    } catch (_) {
-      const fragment = range.extractContents();
-      wrapper.append(fragment);
-      range.insertNode(wrapper);
-    }
+    wrapper.append(range.extractContents());
+    range.insertNode(wrapper);
+    range.selectNodeContents(wrapper);
     savedRange = range.cloneRange();
     syncSource();
   };
-  const syncSource = () => {
-    const clone = richEditor.cloneNode(true);
-    clone.querySelectorAll("div").forEach((element) => {
-      const paragraph = document.createElement("p");
-      while (element.firstChild) paragraph.append(element.firstChild);
-      element.replaceWith(paragraph);
-    });
-    editorSource.value = clone.innerHTML;
-  };
-
   document.addEventListener("selectionchange", rememberSelection);
   richEditor.addEventListener("input", syncSource);
   richEditor.addEventListener("paste", (event) => {
     event.preventDefault();
     document.execCommand("insertText", false, event.clipboardData.getData("text/plain"));
   });
-  document.querySelectorAll("[data-inline-tag]").forEach((button) => {
+  field.querySelectorAll("[data-inline-tag]").forEach((button) => {
     button.addEventListener("mousedown", (event) => event.preventDefault());
     button.addEventListener("click", () => wrapSelection(button.dataset.inlineTag));
   });
-  document.querySelector(".editor-size").addEventListener("change", (event) => {
+  field.querySelector(".editor-size").addEventListener("change", (event) => {
     if (allowedSizeClasses.includes(event.target.value)) wrapSelection("span", event.target.value);
-    event.target.value = "story-text-normal";
+    event.target.value = "";
   });
-  document.querySelectorAll("[data-align]").forEach((button) => {
+  field.querySelectorAll("[data-align]").forEach((button) => {
     button.addEventListener("mousedown", (event) => event.preventDefault());
     button.addEventListener("click", () => {
       const range = restoreSelection();
       if (!range) return;
       const blocks = [...richEditor.querySelectorAll("p, li")].filter((block) => range.intersectsNode(block));
-      const closest = range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer.parentElement;
-      if (!blocks.length && closest) {
-        const block = closest.closest("p, li");
-        if (block && richEditor.contains(block)) blocks.push(block);
+      const origin = range.startContainer.nodeType === Node.ELEMENT_NODE ? range.startContainer : range.startContainer.parentElement;
+      const currentBlock = origin && origin.closest("p, li");
+      if (!blocks.length && currentBlock && richEditor.contains(currentBlock)) blocks.push(currentBlock);
+      if (!blocks.length) {
+        const paragraph = document.createElement("p");
+        paragraph.append(...richEditor.childNodes);
+        richEditor.append(paragraph);
+        blocks.push(paragraph);
       }
       blocks.forEach((block) => {
         block.classList.remove(...allowedAlignClasses);
@@ -83,4 +81,4 @@ if (richEditor && editorSource) {
     });
   });
   richEditor.closest("form").addEventListener("submit", syncSource);
-}
+});
